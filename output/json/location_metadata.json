@@ -1,0 +1,11 @@
+{
+  "deployment_name": "Grand-St-Bernard",
+  "latitude": 45.8694,
+  "longitude": 7.1706,
+  "altitude_m": 2469.0,
+  "timezone": "Europe/Zurich",
+  "coordinate_level": "deployment",
+  "coordinate_source": "Documented Grand St. Bernard pass coordinates (WGS84). The dataset's station_gsb_XY.txt provides per-station offsets in the Swiss CH1903 / LV03 projection but no direct WGS84 translation; deployment-level coordinates are used here.",
+  "station_coordinate_file": null,
+  "uncertainty_notes": "Latitude/longitude refer to the pass and are accurate to within ~1 km, sufficient for sunrise time computation (~4 s of arc per km in latitude)."
+}

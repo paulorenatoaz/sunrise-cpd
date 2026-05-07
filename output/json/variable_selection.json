@@ -1,0 +1,18 @@
+{
+  "selected_variable": "Solar Radiation [W/m^2]",
+  "reason": "Selected 'Solar Radiation [W/m^2]' with priority score 100 from candidates ['Solar Radiation [W/m^2]'].",
+  "candidate_variables": [
+    "Solar Radiation [W/m^2]"
+  ],
+  "candidate_scores": [
+    {
+      "name": "Solar Radiation [W/m^2]",
+      "score": 100
+    }
+  ],
+  "units": "W/m^2",
+  "deployment": "Grand-St-Bernard",
+  "n_sensors_with_variable": 23,
+  "n_valid_observations": null,
+  "notes": []
+}

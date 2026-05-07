@@ -1,0 +1,32 @@
+SensorScope Meteo column definitions (synthesized).
+
+The Zenodo archive of the Grand-St-Bernard SensorScope deployment
+(record 2654726, file stbernard-meteo.zip) does not ship a
+column-definitions text file. The schema below is the standard
+SensorScope "meteo" payload layout used by EPFL deployments and is
+consistent with the data values observed in the Grand-St-Bernard
+meteo files (9 measurement columns following the timestamp block).
+
+References:
+  Barrenetxea et al., "SensorScope: Out-of-the-Box Environmental
+  Monitoring", IPSN 2008.
+  Ingelrest et al., "SensorScope: Application-Specific Sensor
+  Network for Environmental Monitoring", ACM TOSN 2010.
+
+Column 1: Station ID
+Column 2: Year
+Column 3: Month
+Column 4: Day
+Column 5: Hour
+Column 6: Minute
+Column 7: Second
+Column 8: Time since the epoch [s]
+Column 9: Ambient Temperature [degree C]
+Column 10: Surface Temperature [degree C]
+Column 11: Solar Radiation [W/m^2]
+Column 12: Relative Humidity [%]
+Column 13: Soil Moisture [%]
+Column 14: Watermark [kPa]
+Column 15: Rain Meter [mm]
+Column 16: Wind Speed [m/s]
+Column 17: Wind Direction [degree]

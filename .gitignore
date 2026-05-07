@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+*.secret
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# SensorScope raw and intermediate data (large; not redistributed)
+data/raw/
+data/processed/
+data/external/*.zip
+
+# Local cache / temporary outputs
+output/cache/
+output/tmp/
+
+# Local copies of the paper PDF (copyrighted; not redistributed here)
+*.pdf

@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software in academic work, please cite it as below."
+title: "Sunrise CPD: Resource-Constrained Multi-Sensor Change-Point Detection on Sunrise Data"
+abstract: >
+  Empirical evaluation of a resource-constrained multi-sensor change-point
+  detection framework on the SensorScope Grand-St-Bernard deployment, using
+  astronomical sunrise as external ground truth and solar radiation as the
+  observed signal.
+authors:
+  - family-names: "PRA"
+    given-names: "Paulo Renato"
+version: "0.1.0"
+date-released: "2026-05-07"
+license: MIT
+repository-code: "https://github.com/paulorenatoaz/sunrise-cpd"
+keywords:
+  - change-point detection
+  - CUSUM
+  - multi-sensor
+  - resource-constrained sensing
+  - SensorScope
+  - sunrise

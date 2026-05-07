@@ -1,0 +1,58 @@
+{
+  "status": "suitable",
+  "explanation": "10/10 suitability checks passed.",
+  "checks": [
+    {
+      "name": "light_variable_available",
+      "passed": true,
+      "detail": "Solar Radiation [W/m^2]"
+    },
+    {
+      "name": "timestamps_parseable",
+      "passed": true,
+      "detail": "epoch_seconds_utc"
+    },
+    {
+      "name": "timezone_resolved",
+      "passed": true,
+      "detail": "Europe/Zurich"
+    },
+    {
+      "name": "coordinates_known",
+      "passed": true,
+      "detail": "lat=45.8694, lon=7.1706"
+    },
+    {
+      "name": "sunrise_ground_truth_computable",
+      "passed": true,
+      "detail": "43 dates"
+    },
+    {
+      "name": "low_budget_one_sensor",
+      "passed": true,
+      "detail": "9 valid sensors"
+    },
+    {
+      "name": "medium_budget_k_3_sensors",
+      "passed": true,
+      "detail": "9 valid sensors"
+    },
+    {
+      "name": "high_budget_at_least_5_sensors",
+      "passed": true,
+      "detail": "9 valid sensors"
+    },
+    {
+      "name": "enough_valid_days_>=5",
+      "passed": true,
+      "detail": "43 valid days"
+    },
+    {
+      "name": "sunrise_windows_usable",
+      "passed": true,
+      "detail": "9 sensors have D_i"
+    }
+  ],
+  "risks": [],
+  "next_step": "Dataset meets the criteria for the experimental configuration."
+}

@@ -1,0 +1,498 @@
+{
+  "dataset_name": "SensorScope environmental monitoring dataset",
+  "source_url": "https://zenodo.org/records/2654726",
+  "citation": "SensorScope: EPFL environmental wireless sensor network. Zenodo record 2654726.",
+  "local_raw_path": "data/raw/sensorscope",
+  "local_extracted_path": "data/raw/sensorscope/extracted",
+  "archive_path": "data/raw/sensorscope/Sensorscope.zip",
+  "archive_size_bytes": 1046895659,
+  "acquisition_timestamp": "2026-05-07T03:57:57.215466+00:00",
+  "selected_deployment": "Grand-St-Bernard",
+  "selected_deployment_basis": "name match against Grand St. Bernard tokens",
+  "gsb_meteo_dir": "data/raw/sensorscope/extracted/Sensorscope/stbernard/meteo",
+  "gsb_location_dir": "data/raw/sensorscope/extracted/Sensorscope/stbernard/location",
+  "deployments": [
+    {
+      "deployment_name": "Sensorscope",
+      "file_count": 81,
+      "data_file_count": 50,
+      "metadata_file_count": 12,
+      "total_size_bytes": 1109214398,
+      "metadata_files": [
+        "Sensorscope/luce_stations_1xx.zip",
+        "Sensorscope/luce_stations_7x.zip",
+        "Sensorscope/luce_stations_1x.zip",
+        "Sensorscope/luce_stations_5x.zip",
+        "Sensorscope/luce_stations_9x.zip",
+        "Sensorscope/luce_stations_2x.zip",
+        "Sensorscope/luce_stations_4x.zip",
+        "Sensorscope/luce_stations_8x.zip",
+        "Sensorscope/luce_stations_3x.zip",
+        "Sensorscope/luce_stations_6x.zip",
+        "Sensorscope/stbernard/location/station_gsb_XY.txt",
+        "Sensorscope/stbernard/location/GSB_Stations.pdf"
+      ],
+      "candidate_data_files": [
+        "Sensorscope/Plain_Morte_locations.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-6.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-29.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-17.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-8.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-13.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-20.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-3.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-14.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-9.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-31.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-28.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-25.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-5.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-12.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-10.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-18.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-11.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-4.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-7.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-19.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-2.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-15.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-32.txt",
+        "Sensorscope/stbernard/monitor/stbernard-monitor-def.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-19.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-14.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-3.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-20.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-15.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-32.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-28.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-10.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-11.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-17.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-8.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-9.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-13.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-4.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-12.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-29.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-7.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-2.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-def.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-6.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-25.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-31.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-5.txt",
+        "Sensorscope/stbernard/meteo/stbernard-meteo-18.txt",
+        "Sensorscope/stbernard/location/station_gsb_XY.txt"
+      ],
+      "all_files": [
+        {
+          "path": "Sensorscope/stbernard-meteo.zip",
+          "size_bytes": 12721485,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/stbernard-monitor.zip",
+          "size_bytes": 1163959,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_1xx.zip",
+          "size_bytes": 96362937,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/genepi_results_01.jpg",
+          "size_bytes": 874734,
+          "extension": ".jpg"
+        },
+        {
+          "path": "Sensorscope/luce_stations_7x.zip",
+          "size_bytes": 54403714,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/plaine_morte-meteo.zip",
+          "size_bytes": 1544921,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_1x.zip",
+          "size_bytes": 82018486,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_5x.zip",
+          "size_bytes": 83464122,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_9x.zip",
+          "size_bytes": 61703047,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/fishnet-monitor.zip",
+          "size_bytes": 177430,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/pdg2008-meteo.zip",
+          "size_bytes": 725054,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_2x.zip",
+          "size_bytes": 94482800,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/vidicam_seedorf.zip",
+          "size_bytes": 23925928,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/vidicam_genepi.zip",
+          "size_bytes": 71548503,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/genepi-monitor.zip",
+          "size_bytes": 1268784,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/Plain_Morte_locations.txt",
+          "size_bytes": 564,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/sensorscope-monitor.zip",
+          "size_bytes": 78372818,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/genepi-meteo.zip",
+          "size_bytes": 12785279,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/3D_luce_concours_final.jpg",
+          "size_bytes": 463258,
+          "extension": ".jpg"
+        },
+        {
+          "path": "Sensorscope/plaine_morte-monitor.zip",
+          "size_bytes": 117505,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/stbernard-location.zip",
+          "size_bytes": 3751446,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_4x.zip",
+          "size_bytes": 90049689,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_8x.zip",
+          "size_bytes": 66369395,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/vidicam_daily_videos.zip",
+          "size_bytes": 62980757,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/figure_ipsn_tabs_vent2.png",
+          "size_bytes": 1336210,
+          "extension": ".png"
+        },
+        {
+          "path": "Sensorscope/fishnet-meteo.zip",
+          "size_bytes": 1324072,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_3x.zip",
+          "size_bytes": 87958047,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_gprs.pdf",
+          "size_bytes": 120969,
+          "extension": ".pdf"
+        },
+        {
+          "path": "Sensorscope/plaine_morte.jpg",
+          "size_bytes": 208576,
+          "extension": ".jpg"
+        },
+        {
+          "path": "Sensorscope/pdg2008-monitor.zip",
+          "size_bytes": 35999,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/luce_stations_6x.zip",
+          "size_bytes": 54745835,
+          "extension": ".zip"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-6.txt",
+          "size_bytes": 215271,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-29.txt",
+          "size_bytes": 175433,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-17.txt",
+          "size_bytes": 216573,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-8.txt",
+          "size_bytes": 255649,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-13.txt",
+          "size_bytes": 255897,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-20.txt",
+          "size_bytes": 252352,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-3.txt",
+          "size_bytes": 257505,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-14.txt",
+          "size_bytes": 250661,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-9.txt",
+          "size_bytes": 248133,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-31.txt",
+          "size_bytes": 175215,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-28.txt",
+          "size_bytes": 175021,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-25.txt",
+          "size_bytes": 174965,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-5.txt",
+          "size_bytes": 223327,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-12.txt",
+          "size_bytes": 257858,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-10.txt",
+          "size_bytes": 252538,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-18.txt",
+          "size_bytes": 223730,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-11.txt",
+          "size_bytes": 208428,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-4.txt",
+          "size_bytes": 257148,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-7.txt",
+          "size_bytes": 214250,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-19.txt",
+          "size_bytes": 217204,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-2.txt",
+          "size_bytes": 175250,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-15.txt",
+          "size_bytes": 257067,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-32.txt",
+          "size_bytes": 174920,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/monitor/stbernard-monitor-def.txt",
+          "size_bytes": 249,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-19.txt",
+          "size_bytes": 2224095,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-14.txt",
+          "size_bytes": 2614996,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-3.txt",
+          "size_bytes": 2802759,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-20.txt",
+          "size_bytes": 2650123,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-15.txt",
+          "size_bytes": 2482804,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-32.txt",
+          "size_bytes": 1920878,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-28.txt",
+          "size_bytes": 1904104,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-10.txt",
+          "size_bytes": 2632832,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-11.txt",
+          "size_bytes": 2131752,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-17.txt",
+          "size_bytes": 2177649,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-8.txt",
+          "size_bytes": 2472725,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-9.txt",
+          "size_bytes": 2573635,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-13.txt",
+          "size_bytes": 2695032,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-4.txt",
+          "size_bytes": 2825810,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-12.txt",
+          "size_bytes": 2691636,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-29.txt",
+          "size_bytes": 1912840,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-7.txt",
+          "size_bytes": 2177793,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-2.txt",
+          "size_bytes": 1843487,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-def.txt",
+          "size_bytes": 335,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-6.txt",
+          "size_bytes": 2111340,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-25.txt",
+          "size_bytes": 1907507,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-31.txt",
+          "size_bytes": 1887456,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-5.txt",
+          "size_bytes": 2406389,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/meteo/stbernard-meteo-18.txt",
+          "size_bytes": 2289372,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/location/station_gsb_XY.txt",
+          "size_bytes": 544,
+          "extension": ".txt"
+        },
+        {
+          "path": "Sensorscope/stbernard/location/GSB_Stations.pdf",
+          "size_bytes": 3755538,
+          "extension": ".pdf"
+        }
+      ],
+      "is_grand_st_bernard": false
+    }
+  ],
+  "notes": []
+}

@@ -1,0 +1,4088 @@
+{
+  "scenario_name": "high_budget",
+  "budget_regime": "high",
+  "budget_description": "High budget. The sampling policy may activate every valid sensor from the multi-sensor network.",
+  "selection_policy": "Rank candidate sensors by D_i (Gaussian divergence at sunrise) and pick the top entries allowed by the budget. Costs C_i and T_i are not available, so unit cost is assumed; this is equivalent to ranking by D_i / (C_i + T_i) with C_i + T_i = 1.",
+  "all_valid_sensors": [
+    "2",
+    "25",
+    "28",
+    "29",
+    "3",
+    "31",
+    "32",
+    "4",
+    "5"
+  ],
+  "selected_sensors": [
+    "5",
+    "25",
+    "4",
+    "29",
+    "32",
+    "31",
+    "2",
+    "28",
+    "3"
+  ],
+  "selection_reason": "High-budget policy: selected all 9 valid sensors.",
+  "sensor_ranking": [
+    {
+      "sensor_id": "5",
+      "D_i": 1.0371523658852024,
+      "score": 1.0371523658852024,
+      "rank": 1
+    },
+    {
+      "sensor_id": "25",
+      "D_i": 0.8266125755853037,
+      "score": 0.8266125755853037,
+      "rank": 2
+    },
+    {
+      "sensor_id": "4",
+      "D_i": 0.71644127450863,
+      "score": 0.71644127450863,
+      "rank": 3
+    },
+    {
+      "sensor_id": "29",
+      "D_i": 0.6941987935469671,
+      "score": 0.6941987935469671,
+      "rank": 4
+    },
+    {
+      "sensor_id": "32",
+      "D_i": 0.6309357336660095,
+      "score": 0.6309357336660095,
+      "rank": 5
+    },
+    {
+      "sensor_id": "31",
+      "D_i": 0.5841832668691657,
+      "score": 0.5841832668691657,
+      "rank": 6
+    },
+    {
+      "sensor_id": "2",
+      "D_i": 0.5382499174368247,
+      "score": 0.5382499174368247,
+      "rank": 7
+    },
+    {
+      "sensor_id": "28",
+      "D_i": 0.5229958019413189,
+      "score": 0.5229958019413189,
+      "rank": 8
+    },
+    {
+      "sensor_id": "3",
+      "D_i": 0.466889297756536,
+      "score": 0.466889297756536,
+      "rank": 9
+    }
+  ],
+  "unit_cost_assumption": true,
+  "k": 3,
+  "detector_input_mode": "multi_sensor",
+  "detector_name": "one_sided_page_cusum_multi_sensor",
+  "aggregation": "mean_z",
+  "detector_aggregation": "mean_z",
+  "detector_aggregation_description": "At each timestamp, compute the per-sensor standardized evidence z_{i,t} = (x_{i,t} - mu_{0,i}) / sigma_{0,i} for each active sensor with a usable baseline, then average over the active sensors that report a finite reading. Apply the one-sided Page CUSUM to this aggregated evidence.",
+  "detector_parameters": {
+    "drift_k": 0.5,
+    "min_baseline_samples": 5,
+    "fallback_sigma": 1.0,
+    "formula": "z_{i,t} = (x_{i,t} - mu_{0,i})/sigma_{0,i}; Z_t = mean_{i in S_t} z_{i,t}; S_t = max(0, S_{t-1} + Z_t - k); detect when S_t >= h."
+  },
+  "threshold": 5.0,
+  "tolerance_minutes": 15,
+  "analysis_window": {
+    "pre_window_minutes": 120,
+    "post_window_minutes": 120,
+    "sync_freq": "2min"
+  },
+  "number_of_days": 43,
+  "number_of_detected_days": 42,
+  "number_of_missed_detections": 1,
+  "number_of_false_alarms": 32,
+  "aggregate_metrics": {
+    "valid_days_count": 43,
+    "detected_days_count": 42,
+    "missed_detection_count": 1,
+    "false_alarm_count": 32,
+    "mean_signed_delay_minutes": -59.55419929444445,
+    "median_signed_delay_minutes": -61.17660230833333,
+    "mean_absolute_error_minutes": 59.55419929444445,
+    "median_absolute_error_minutes": 61.17660230833333,
+    "std_signed_delay_minutes": 39.84062478800366,
+    "min_signed_delay_minutes": -117.60685826666666,
+    "max_signed_delay_minutes": -3.7752913500000003
+  },
+  "per_day_results": [
+    {
+      "date": "2007-09-13",
+      "true_change_point_utc": "2007-09-13T05:06:38.190498+00:00",
+      "true_change_point_local": "2007-09-13T07:06:38.190498+02:00",
+      "detected_change_point_utc": null,
+      "detected_change_point_local": null,
+      "signed_delay_minutes": null,
+      "absolute_error_minutes": null,
+      "status": "missed_detection",
+      "false_alarm": false,
+      "missed_detection": true,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [],
+      "grid_points": 0,
+      "baselines": {},
+      "statistic_at_detection": null,
+      "notes": [
+        "No observations in window."
+      ]
+    },
+    {
+      "date": "2007-09-14",
+      "true_change_point_utc": "2007-09-14T05:07:52.614310+00:00",
+      "true_change_point_local": "2007-09-14T07:07:52.614310+02:00",
+      "detected_change_point_utc": "2007-09-14T04:55:47+00:00",
+      "detected_change_point_local": "2007-09-14T06:55:47+02:00",
+      "signed_delay_minutes": -12.093571833333334,
+      "absolute_error_minutes": 12.093571833333334,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "4",
+        "3"
+      ],
+      "grid_points": 240,
+      "baselines": {
+        "5": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.2406166666666665,
+          "sigma": 1.4039478730444335,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.8773499999999999,
+          "sigma": 1.1409107397608695,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.619428642929279,
+      "notes": [
+        "Sensor 5: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-15",
+      "true_change_point_utc": "2007-09-15T05:09:07.087765+00:00",
+      "true_change_point_local": "2007-09-15T07:09:07.087765+02:00",
+      "detected_change_point_utc": "2007-09-15T04:49:43+00:00",
+      "detected_change_point_local": "2007-09-15T06:49:43+02:00",
+      "signed_delay_minutes": -19.40146275,
+      "absolute_error_minutes": 19.40146275,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 360,
+      "baselines": {
+        "5": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.4356,
+          "sigma": 2.341972471577563,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.7355333333333334,
+          "sigma": 1.0949234237857925,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.7887166666666668,
+          "sigma": 1.1437066574789105,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.311145960864827,
+      "notes": [
+        "Sensor 5: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-16",
+      "true_change_point_utc": "2007-09-16T05:10:21.619640+00:00",
+      "true_change_point_local": "2007-09-16T07:10:21.619640+02:00",
+      "detected_change_point_utc": "2007-09-16T03:44:08+00:00",
+      "detected_change_point_local": "2007-09-16T05:44:08+02:00",
+      "signed_delay_minutes": -86.226994,
+      "absolute_error_minutes": 86.226994,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 360,
+      "baselines": {
+        "5": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.6216666666666668,
+          "sigma": 2.038096525272462,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 1.2761666666666662,
+          "sigma": 2.0863840519974692,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 1.0279999999999998,
+          "sigma": 1.8545200484679296,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.514632503214971,
+      "notes": [
+        "Sensor 5: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-17",
+      "true_change_point_utc": "2007-09-17T05:11:36.219033+00:00",
+      "true_change_point_local": "2007-09-17T07:11:36.219033+02:00",
+      "detected_change_point_utc": "2007-09-17T03:25:25+00:00",
+      "detected_change_point_local": "2007-09-17T05:25:25+02:00",
+      "signed_delay_minutes": -106.18698388333334,
+      "absolute_error_minutes": 106.18698388333334,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 360,
+      "baselines": {
+        "5": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.0367833333333332,
+          "sigma": 1.1050005305875965,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 1.1166333333333334,
+          "sigma": 1.4277839052972927,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.9216666666666667,
+          "sigma": 1.5193316178411318,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.041757895089632,
+      "notes": [
+        "Sensor 5: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-18",
+      "true_change_point_utc": "2007-09-18T05:12:50.895336+00:00",
+      "true_change_point_local": "2007-09-18T07:12:50.895336+02:00",
+      "detected_change_point_utc": "2007-09-18T04:51:22+00:00",
+      "detected_change_point_local": "2007-09-18T06:51:22+02:00",
+      "signed_delay_minutes": -21.481588933333335,
+      "absolute_error_minutes": 21.481588933333335,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 360,
+      "baselines": {
+        "5": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.3381166666666668,
+          "sigma": 1.4990488520173262,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.6469333333333334,
+          "sigma": 0.8650125083188234,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.31018333333333337,
+          "sigma": 1.2586483803986823,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.013190494131469,
+      "notes": [
+        "Sensor 5: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-19",
+      "true_change_point_utc": "2007-09-19T05:14:05.658195+00:00",
+      "true_change_point_local": "2007-09-19T07:14:05.658195+02:00",
+      "detected_change_point_utc": "2007-09-19T03:51:57+00:00",
+      "detected_change_point_local": "2007-09-19T05:51:57+02:00",
+      "signed_delay_minutes": -82.14430325,
+      "absolute_error_minutes": 82.14430325,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 360,
+      "baselines": {
+        "5": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.258333333333333,
+          "sigma": 1.352827380305394,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.9659999999999997,
+          "sigma": 1.6041513517502126,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.12406666666666664,
+          "sigma": 0.3960314089010595,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 7.831573661334687,
+      "notes": [
+        "Sensor 5: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-20",
+      "true_change_point_utc": "2007-09-20T05:15:20.517481+00:00",
+      "true_change_point_local": "2007-09-20T07:15:20.517481+02:00",
+      "detected_change_point_utc": "2007-09-20T05:11:34+00:00",
+      "detected_change_point_local": "2007-09-20T07:11:34+02:00",
+      "signed_delay_minutes": -3.7752913500000003,
+      "absolute_error_minutes": 3.7752913500000003,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 481,
+      "baselines": {
+        "5": {
+          "mu": 1.178583333333333,
+          "sigma": 1.5908714091325797,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 2.011616666666667,
+          "sigma": 2.480722435041356,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.6380833333333332,
+          "sigma": 0.8352537682313278,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.08718032786885245,
+          "sigma": 0.37827893183895933,
+          "n_pre_finite": 61,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 9.75653375446576,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-21",
+      "true_change_point_utc": "2007-09-21T05:16:35.483256+00:00",
+      "true_change_point_local": "2007-09-21T07:16:35.483256+02:00",
+      "detected_change_point_utc": "2007-09-21T05:07:41+00:00",
+      "detected_change_point_local": "2007-09-21T07:07:41+02:00",
+      "signed_delay_minutes": -8.908054266666666,
+      "absolute_error_minutes": 8.908054266666666,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 480,
+      "baselines": {
+        "5": {
+          "mu": 1.2849,
+          "sigma": 1.4264161883450712,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.5330666666666664,
+          "sigma": 1.8053626225415371,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.8684333333333333,
+          "sigma": 1.22651497972109,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.7266999999999999,
+          "sigma": 1.2497689318633454,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.706664564113887,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-22",
+      "true_change_point_utc": "2007-09-22T05:17:50.565738+00:00",
+      "true_change_point_local": "2007-09-22T07:17:50.565738+02:00",
+      "detected_change_point_utc": "2007-09-22T03:44:33+00:00",
+      "detected_change_point_local": "2007-09-22T05:44:33+02:00",
+      "signed_delay_minutes": -93.2927623,
+      "absolute_error_minutes": 93.2927623,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 480,
+      "baselines": {
+        "5": {
+          "mu": 1.0367833333333332,
+          "sigma": 1.1307158238451362,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.4001166666666662,
+          "sigma": 1.5905292914109308,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 1.3292666666666666,
+          "sigma": 1.7250485511877054,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.8773666666666667,
+          "sigma": 1.4248189414164907,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.460872640245462,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-23",
+      "true_change_point_utc": "2007-09-23T05:19:05.775271+00:00",
+      "true_change_point_local": "2007-09-23T07:19:05.775271+02:00",
+      "detected_change_point_utc": "2007-09-23T03:49:33+00:00",
+      "detected_change_point_local": "2007-09-23T05:49:33+02:00",
+      "signed_delay_minutes": -89.54625451666668,
+      "absolute_error_minutes": 89.54625451666668,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 480,
+      "baselines": {
+        "5": {
+          "mu": 0.9393499999999998,
+          "sigma": 1.0739942370359539,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.3203666666666665,
+          "sigma": 1.3999138589318196,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.5937833333333332,
+          "sigma": 0.8595082569616831,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.5760500000000001,
+          "sigma": 1.2277737938981474,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.6857649093741065,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-24",
+      "true_change_point_utc": "2007-09-24T05:20:21.122283+00:00",
+      "true_change_point_local": "2007-09-24T07:20:21.122283+02:00",
+      "detected_change_point_utc": "2007-09-24T03:30:00+00:00",
+      "detected_change_point_local": "2007-09-24T05:30:00+02:00",
+      "signed_delay_minutes": -110.35203804999999,
+      "absolute_error_minutes": 110.35203804999999,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 480,
+      "baselines": {
+        "5": {
+          "mu": 0.9481833333333332,
+          "sigma": 1.0683186931931823,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.2051333333333332,
+          "sigma": 1.24547933005005,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 1.054583333333333,
+          "sigma": 1.8143420368927567,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.49625,
+          "sigma": 1.007230935178056,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.073048775292384,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-25",
+      "true_change_point_utc": "2007-09-25T05:21:36.617257+00:00",
+      "true_change_point_local": "2007-09-25T07:21:36.617257+02:00",
+      "detected_change_point_utc": "2007-09-25T04:40:37+00:00",
+      "detected_change_point_local": "2007-09-25T06:40:37+02:00",
+      "signed_delay_minutes": -40.99362095,
+      "absolute_error_minutes": 40.99362095,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 481,
+      "baselines": {
+        "5": {
+          "mu": 0.8950166666666668,
+          "sigma": 1.228479913560901,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.6748,
+          "sigma": 2.4195677566072744,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.4532786885245901,
+          "sigma": 0.47385093053784827,
+          "n_pre_finite": 61,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.3988166666666666,
+          "sigma": 0.7808930240255393,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.129317454387178,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-09-26",
+      "true_change_point_utc": "2007-09-26T05:22:52.270695+00:00",
+      "true_change_point_local": "2007-09-26T07:22:52.270695+02:00",
+      "detected_change_point_utc": "2007-09-26T03:40:20+00:00",
+      "detected_change_point_local": "2007-09-26T05:40:20+02:00",
+      "signed_delay_minutes": -102.53784491666667,
+      "absolute_error_minutes": 102.53784491666667,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1032,
+      "baselines": {
+        "5": {
+          "mu": 1.2671999999999999,
+          "sigma": 1.9161294036482566,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0904237288135594,
+          "sigma": 1.8001825310074746,
+          "n_pre_finite": 59,
+          "used": true
+        },
+        "4": {
+          "mu": 1.4976833333333335,
+          "sigma": 1.7444156079549495,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.405949152542373,
+          "sigma": 1.4266419629582636,
+          "n_pre_finite": 59,
+          "used": true
+        },
+        "32": {
+          "mu": 0.10815254237288134,
+          "sigma": 0.35296873035085397,
+          "n_pre_finite": 59,
+          "used": true
+        },
+        "31": {
+          "mu": 0.8201186440677964,
+          "sigma": 1.0509886164406277,
+          "n_pre_finite": 59,
+          "used": true
+        },
+        "2": {
+          "mu": 0.7621999999999998,
+          "sigma": 0.8665812782794275,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.0808688524590162,
+          "sigma": 1.5772327082098552,
+          "n_pre_finite": 61,
+          "used": true
+        },
+        "3": {
+          "mu": 0.5583166666666667,
+          "sigma": 1.3650069782110903,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.219621269624555,
+      "notes": []
+    },
+    {
+      "date": "2007-09-27",
+      "true_change_point_utc": "2007-09-27T05:24:08.093076+00:00",
+      "true_change_point_local": "2007-09-27T07:24:08.093076+02:00",
+      "detected_change_point_utc": "2007-09-27T03:29:30+00:00",
+      "detected_change_point_local": "2007-09-27T05:29:30+02:00",
+      "signed_delay_minutes": -114.6348846,
+      "absolute_error_minutes": 114.6348846,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1078,
+      "baselines": {
+        "5": {
+          "mu": 1.2051833333333335,
+          "sigma": 1.7861073713778786,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0191166666666667,
+          "sigma": 1.7791949530822768,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.8343333333333334,
+          "sigma": 1.7983275626533868,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.7280499999999999,
+          "sigma": 1.9374044529748506,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.35444999999999993,
+          "sigma": 1.0252023929986553,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.0634666666666666,
+          "sigma": 1.6352189452394612,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.6823166666666667,
+          "sigma": 1.0270699230510834,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.0900333333333334,
+          "sigma": 1.6009068401173328,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.5583333333333333,
+          "sigma": 1.2817655417254759,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.287069807385536,
+      "notes": []
+    },
+    {
+      "date": "2007-09-28",
+      "true_change_point_utc": "2007-09-28T05:25:24.094824+00:00",
+      "true_change_point_local": "2007-09-28T07:25:24.094824+02:00",
+      "detected_change_point_utc": "2007-09-28T03:47:28+00:00",
+      "detected_change_point_local": "2007-09-28T05:47:28+02:00",
+      "signed_delay_minutes": -97.93491373333333,
+      "absolute_error_minutes": 97.93491373333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1080,
+      "baselines": {
+        "5": {
+          "mu": 1.0811666666666666,
+          "sigma": 1.6983479826161945,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.10775,
+          "sigma": 1.3716371465749995,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.4267333333333334,
+          "sigma": 1.1311472182605284,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.3292666666666668,
+          "sigma": 1.4034018459596447,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.28358333333333335,
+          "sigma": 1.1602491154433194,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.6203333333333333,
+          "sigma": 0.6933468490642649,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.5760500000000001,
+          "sigma": 0.7663685537451882,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.0191500000000002,
+          "sigma": 1.8270133804580855,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.39881666666666665,
+          "sigma": 0.7558979729303592,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.43551848068325,
+      "notes": []
+    },
+    {
+      "date": "2007-09-29",
+      "true_change_point_utc": "2007-09-29T05:26:40.286271+00:00",
+      "true_change_point_local": "2007-09-29T07:26:40.286271+02:00",
+      "detected_change_point_utc": "2007-09-29T03:56:07+00:00",
+      "detected_change_point_local": "2007-09-29T05:56:07+02:00",
+      "signed_delay_minutes": -90.55477118333333,
+      "absolute_error_minutes": 90.55477118333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1070,
+      "baselines": {
+        "5": {
+          "mu": 1.2140666666666664,
+          "sigma": 1.9211273602922,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.7355,
+          "sigma": 0.9291277028135548,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.5153333333333332,
+          "sigma": 1.8231870183705243,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.2583166666666663,
+          "sigma": 1.245884445109165,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.5317166666666666,
+          "sigma": 1.48788034979656,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.92165,
+          "sigma": 1.2339329408612014,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.7001333333333333,
+          "sigma": 1.0790455051849699,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 0.9570166666666666,
+          "sigma": 1.2140369900776649,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.6912333333333334,
+          "sigma": 1.392372945445666,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.217720067004411,
+      "notes": []
+    },
+    {
+      "date": "2007-09-30",
+      "true_change_point_utc": "2007-09-30T05:27:56.677611+00:00",
+      "true_change_point_local": "2007-09-30T07:27:56.677611+02:00",
+      "detected_change_point_utc": "2007-09-30T03:54:20+00:00",
+      "detected_change_point_local": "2007-09-30T05:54:20+02:00",
+      "signed_delay_minutes": -93.61129351666666,
+      "absolute_error_minutes": 93.61129351666666,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1070,
+      "baselines": {
+        "5": {
+          "mu": 1.3115999999999999,
+          "sigma": 1.9443693692474682,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.9304499999999999,
+          "sigma": 1.1231384964479625,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.5330499999999998,
+          "sigma": 1.602915124316541,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.3824166666666666,
+          "sigma": 1.9013287707897255,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.5140166666666667,
+          "sigma": 1.7124300455009727,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.8240666666666665,
+          "sigma": 1.091936033183708,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.5938166666666667,
+          "sigma": 1.1165622101831314,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 0.7621166666666667,
+          "sigma": 0.9610059893579856,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.7444666666666666,
+          "sigma": 1.364263263856117,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.061108884943553,
+      "notes": []
+    },
+    {
+      "date": "2007-10-01",
+      "true_change_point_utc": "2007-10-01T05:29:13.278867+00:00",
+      "true_change_point_local": "2007-10-01T07:29:13.278867+02:00",
+      "detected_change_point_utc": "2007-10-01T05:09:45+00:00",
+      "detected_change_point_local": "2007-10-01T07:09:45+02:00",
+      "signed_delay_minutes": -19.47131445,
+      "absolute_error_minutes": 19.47131445,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 986,
+      "baselines": {
+        "5": {
+          "mu": 1.0545666666666664,
+          "sigma": 0.9862528703602262,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.16975,
+          "sigma": 1.8387407410268213,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.7103833333333334,
+          "sigma": 1.6267339545972315,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.772316666666667,
+          "sigma": 1.6546568233646954,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.6026000000000001,
+          "sigma": 1.5950334697088726,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.6660833333333334,
+          "sigma": 2.3646931595242044,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.7266833333333333,
+          "sigma": 0.9076450155725999,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.488733333333333,
+          "sigma": 1.9178348479352445,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.54945,
+          "sigma": 1.0077669966274572,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.352220090192403,
+      "notes": []
+    },
+    {
+      "date": "2007-10-02",
+      "true_change_point_utc": "2007-10-02T05:30:30.099847+00:00",
+      "true_change_point_local": "2007-10-02T07:30:30.099847+02:00",
+      "detected_change_point_utc": "2007-10-02T04:33:14+00:00",
+      "detected_change_point_local": "2007-10-02T06:33:14+02:00",
+      "signed_delay_minutes": -57.26833078333333,
+      "absolute_error_minutes": 57.26833078333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1080,
+      "baselines": {
+        "5": {
+          "mu": 1.3115166666666667,
+          "sigma": 1.747072122070956,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0368333333333335,
+          "sigma": 1.7441698347435601,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.6039166666666667,
+          "sigma": 1.44707155237176,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.4622,
+          "sigma": 1.75285981146356,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.39879999999999993,
+          "sigma": 0.9523119023313914,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.7710833333333332,
+          "sigma": 1.1137574864846318,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 1.01025,
+          "sigma": 1.6975763842927585,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.0190333333333332,
+          "sigma": 1.0233860872690321,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.5228666666666666,
+          "sigma": 1.024348630845048,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 8.586954120694735,
+      "notes": []
+    },
+    {
+      "date": "2007-10-03",
+      "true_change_point_utc": "2007-10-03T05:31:47.150105+00:00",
+      "true_change_point_local": "2007-10-03T07:31:47.150105+02:00",
+      "detected_change_point_utc": "2007-10-03T05:20:27+00:00",
+      "detected_change_point_local": "2007-10-03T07:20:27+02:00",
+      "signed_delay_minutes": -11.335835083333334,
+      "absolute_error_minutes": 11.335835083333334,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1081,
+      "baselines": {
+        "5": {
+          "mu": 1.2672166666666667,
+          "sigma": 1.781245518261782,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.9850500000000002,
+          "sigma": 2.3695372746092667,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 2.2508500000000002,
+          "sigma": 2.738331873914284,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.8166,
+          "sigma": 2.35219782691617,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.5139833333333333,
+          "sigma": 1.3946732378573414,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.3027000000000002,
+          "sigma": 1.9928845145004248,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 1.2140333333333335,
+          "sigma": 2.1561182474936618,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.3027166666666667,
+          "sigma": 1.90942562214326,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.1963833333333334,
+          "sigma": 1.9048640779986685,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.132080701827248,
+      "notes": []
+    },
+    {
+      "date": "2007-10-04",
+      "true_change_point_utc": "2007-10-04T05:33:04.438893+00:00",
+      "true_change_point_local": "2007-10-04T07:33:04.438893+02:00",
+      "detected_change_point_utc": "2007-10-04T04:25:17+00:00",
+      "detected_change_point_local": "2007-10-04T06:25:17+02:00",
+      "signed_delay_minutes": -67.79064821666667,
+      "absolute_error_minutes": 67.79064821666667,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1049,
+      "baselines": {
+        "5": {
+          "mu": 0.7443499999999997,
+          "sigma": 0.9035876670439333,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.7532166666666666,
+          "sigma": 0.8089412015184568,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.4356166666666665,
+          "sigma": 1.716110640932252,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.5773499999999998,
+          "sigma": 2.0228847820687723,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.05316666666666667,
+          "sigma": 0.21218733062281583,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.8772666666666666,
+          "sigma": 1.1821115962499906,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.5228666666666667,
+          "sigma": 0.6380602613978881,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.1166000000000003,
+          "sigma": 2.1217155930112592,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.4519666666666666,
+          "sigma": 1.6838416424462719,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.599367344850837,
+      "notes": []
+    },
+    {
+      "date": "2007-10-05",
+      "true_change_point_utc": "2007-10-05T05:34:21.975123+00:00",
+      "true_change_point_local": "2007-10-05T07:34:21.975123+02:00",
+      "detected_change_point_utc": "2007-10-05T05:18:24+00:00",
+      "detected_change_point_local": "2007-10-05T07:18:24+02:00",
+      "signed_delay_minutes": -15.966252050000001,
+      "absolute_error_minutes": 15.966252050000001,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 980,
+      "baselines": {
+        "5": {
+          "mu": 1.2051833333333335,
+          "sigma": 1.7834145548059726,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.5065666666666666,
+          "sigma": 2.3782858544863186,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.8786499999999997,
+          "sigma": 1.9615908350716997,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.6836666666666666,
+          "sigma": 1.9631841022199215,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.18611666666666662,
+          "sigma": 0.7759572566348573,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.2052166666666666,
+          "sigma": 1.6201367392769048,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.7799,
+          "sigma": 1.1266917178707954,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 0.8773166666666666,
+          "sigma": 1.7203626587680911,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.48741666666666666,
+          "sigma": 1.235565681078868,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 7.2456419499380695,
+      "notes": []
+    },
+    {
+      "date": "2007-10-06",
+      "true_change_point_utc": "2007-10-06T05:35:39.767316+00:00",
+      "true_change_point_local": "2007-10-06T07:35:39.767316+02:00",
+      "detected_change_point_utc": "2007-10-06T04:39:58+00:00",
+      "detected_change_point_local": "2007-10-06T06:39:58+02:00",
+      "signed_delay_minutes": -55.69612193333333,
+      "absolute_error_minutes": 55.69612193333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 848,
+      "baselines": {
+        "5": {
+          "mu": 0.8949999999999998,
+          "sigma": 1.0655705402605622,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.8773333333333333,
+          "sigma": 1.1239719320137858,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.5950833333333334,
+          "sigma": 1.3206896669269748,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 0.9747500000000001,
+          "sigma": 0.8022974558273998,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.31901666666666667,
+          "sigma": 1.0322991041338165,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.9128166666666664,
+          "sigma": 1.5169113410699608,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 0.9570000000000001,
+          "sigma": 1.23358266986442,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.3545166666666667,
+          "sigma": 0.9773042912438357,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.163380561340361,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-07",
+      "true_change_point_utc": "2007-10-07T05:36:57.823564+00:00",
+      "true_change_point_local": "2007-10-07T07:36:57.823564+02:00",
+      "detected_change_point_utc": "2007-10-07T04:11:44+00:00",
+      "detected_change_point_local": "2007-10-07T06:11:44+02:00",
+      "signed_delay_minutes": -85.23039273333333,
+      "absolute_error_minutes": 85.23039273333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 870,
+      "baselines": {
+        "5": {
+          "mu": 0.9216,
+          "sigma": 0.9382903710147426,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.1166333333333331,
+          "sigma": 1.4509501967491258,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.8787166666666666,
+          "sigma": 1.7688534742247126,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.5684666666666667,
+          "sigma": 1.6217101401086058,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.5494166666666668,
+          "sigma": 1.4419678443447668,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.79755,
+          "sigma": 1.0383303648695676,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.0988499999999999,
+          "sigma": 1.477832010647663,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.7621666666666668,
+          "sigma": 1.7135924516627283,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.464022830630903,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-08",
+      "true_change_point_utc": "2007-10-08T05:38:16.151474+00:00",
+      "true_change_point_local": "2007-10-08T07:38:16.151474+02:00",
+      "detected_change_point_utc": "2007-10-08T05:07:39+00:00",
+      "detected_change_point_local": "2007-10-08T07:07:39+02:00",
+      "signed_delay_minutes": -30.619191233333332,
+      "absolute_error_minutes": 30.619191233333332,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 841,
+      "baselines": {
+        "5": {
+          "mu": 1.1697333333333333,
+          "sigma": 1.3593449552430144,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.1786666666666668,
+          "sigma": 1.5357298454455102,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.88755,
+          "sigma": 2.368707588860521,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.4533333333333331,
+          "sigma": 1.8467209939182831,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.4253333333333333,
+          "sigma": 0.8409558860367689,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.0368333333333333,
+          "sigma": 1.3221731490838073,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.3735833333333332,
+          "sigma": 2.07504228498199,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.6912499999999999,
+          "sigma": 0.8606421060729964,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.834418354835179,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-09",
+      "true_change_point_utc": "2007-10-09T05:39:34.758125+00:00",
+      "true_change_point_local": "2007-10-09T07:39:34.758125+02:00",
+      "detected_change_point_utc": "2007-10-09T05:12:16+00:00",
+      "detected_change_point_local": "2007-10-09T07:12:16+02:00",
+      "signed_delay_minutes": -27.31263541666667,
+      "absolute_error_minutes": 27.31263541666667,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 915,
+      "baselines": {
+        "5": {
+          "mu": 1.3115333333333334,
+          "sigma": 1.416816274187398,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.9836666666666666,
+          "sigma": 1.1699543474602943,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.18745,
+          "sigma": 0.7731631578419057,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.2583666666666669,
+          "sigma": 1.2687396517626468,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.6292166666666665,
+          "sigma": 1.5494748819800228,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.9393666666666667,
+          "sigma": 1.6215364650061475,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.1697166666666667,
+          "sigma": 1.6779892334321231,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.7798166666666666,
+          "sigma": 0.9763276660946982,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.536408604143852,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-10",
+      "true_change_point_utc": "2007-10-10T05:40:53.650020+00:00",
+      "true_change_point_local": "2007-10-10T07:40:53.650020+02:00",
+      "detected_change_point_utc": "2007-10-10T04:12:59+00:00",
+      "detected_change_point_local": "2007-10-10T06:12:59+02:00",
+      "signed_delay_minutes": -87.91083366666666,
+      "absolute_error_minutes": 87.91083366666666,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 843,
+      "baselines": {
+        "5": {
+          "mu": 1.0634333333333332,
+          "sigma": 1.3599842891249394,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0988666666666664,
+          "sigma": 1.547450910660482,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.7014166666666664,
+          "sigma": 2.369482688959098,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.5951,
+          "sigma": 1.9481640527099318,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.4962833333333333,
+          "sigma": 1.445060858394302,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.6039833333333333,
+          "sigma": 2.311524836014989,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.1343166666666664,
+          "sigma": 1.6655969306259946,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.9659333333333333,
+          "sigma": 1.423653415100629,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.569973704488676,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-11",
+      "true_change_point_utc": "2007-10-11T05:42:12.833029+00:00",
+      "true_change_point_local": "2007-10-11T07:42:12.833029+02:00",
+      "detected_change_point_utc": "2007-10-11T03:51:44+00:00",
+      "detected_change_point_local": "2007-10-11T05:51:44+02:00",
+      "signed_delay_minutes": -110.48055048333335,
+      "absolute_error_minutes": 110.48055048333335,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 840,
+      "baselines": {
+        "5": {
+          "mu": 0.9038999999999999,
+          "sigma": 1.1678368196319788,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0634666666666666,
+          "sigma": 1.302374343679054,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.7014333333333334,
+          "sigma": 1.602085805343651,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.0988,
+          "sigma": 1.1284445992423917,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.5582999999999998,
+          "sigma": 1.3544567026383802,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.6557499999999999,
+          "sigma": 1.0143363301577866,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.2406166666666667,
+          "sigma": 1.8095247722571886,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.0191333333333334,
+          "sigma": 1.2547529632840309,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.019955557682362,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-12",
+      "true_change_point_utc": "2007-10-12T05:43:32.312346+00:00",
+      "true_change_point_local": "2007-10-12T07:43:32.312346+02:00",
+      "detected_change_point_utc": "2007-10-12T05:31:51+00:00",
+      "detected_change_point_local": "2007-10-12T07:31:51+02:00",
+      "signed_delay_minutes": -11.688539100000002,
+      "absolute_error_minutes": 11.688539100000002,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 883,
+      "baselines": {
+        "5": {
+          "mu": 1.5862500000000002,
+          "sigma": 2.4247787222125887,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.7723333333333333,
+          "sigma": 2.166310834753028,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.9583666666666668,
+          "sigma": 2.127985057665988,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.7989499999999998,
+          "sigma": 2.4121981284747216,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.6469333333333332,
+          "sigma": 1.5512839610089493,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.2761833333333334,
+          "sigma": 1.8215596361887496,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.53305,
+          "sigma": 2.156113723180699,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.0456833333333333,
+          "sigma": 1.5384139035710012,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.094079305542776,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-13",
+      "true_change_point_utc": "2007-10-13T05:44:52.092430+00:00",
+      "true_change_point_local": "2007-10-13T07:44:52.092430+02:00",
+      "detected_change_point_utc": "2007-10-13T04:39:47+00:00",
+      "detected_change_point_local": "2007-10-13T06:39:47+02:00",
+      "signed_delay_minutes": -65.08487383333333,
+      "absolute_error_minutes": 65.08487383333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 894,
+      "baselines": {
+        "5": {
+          "mu": 1.1070491803278686,
+          "sigma": 1.2019622765326914,
+          "n_pre_finite": 61,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0899999999999999,
+          "sigma": 1.3365900326032052,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.7191666666666665,
+          "sigma": 1.4097393696692593,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.65715,
+          "sigma": 1.926105879352061,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.4519333333333332,
+          "sigma": 0.8909182059636642,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.1431499999999999,
+          "sigma": 1.4078650121275411,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.4179333333333333,
+          "sigma": 2.0006201230708838,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.3558999999999997,
+          "sigma": 2.107405768848579,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.164357655489412,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-14",
+      "true_change_point_utc": "2007-10-14T05:46:12.176956+00:00",
+      "true_change_point_local": "2007-10-14T07:46:12.176956+02:00",
+      "detected_change_point_utc": "2007-10-14T05:35:56+00:00",
+      "detected_change_point_local": "2007-10-14T07:35:56+02:00",
+      "signed_delay_minutes": -10.269615933333334,
+      "absolute_error_minutes": 10.269615933333334,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 960,
+      "baselines": {
+        "5": {
+          "mu": 1.5950833333333336,
+          "sigma": 1.9308368370328284,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.8684999999999999,
+          "sigma": 1.1664086050344042,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.7457333333333336,
+          "sigma": 1.4357504134484913,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.4533333333333334,
+          "sigma": 1.5161749783490528,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.38993333333333335,
+          "sigma": 0.9585065690634849,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.9393666666666666,
+          "sigma": 1.3578414446099976,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.3026833333333336,
+          "sigma": 1.6008936115962602,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.0191166666666667,
+          "sigma": 1.2737313940247739,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 7.237358017773676,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-15",
+      "true_change_point_utc": "2007-10-15T05:47:32.568759+00:00",
+      "true_change_point_local": "2007-10-15T07:47:32.568759+02:00",
+      "detected_change_point_utc": "2007-10-15T04:59:25+00:00",
+      "detected_change_point_local": "2007-10-15T06:59:25+02:00",
+      "signed_delay_minutes": -48.12614598333333,
+      "absolute_error_minutes": 48.12614598333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 953,
+      "baselines": {
+        "5": {
+          "mu": 1.3912833333333332,
+          "sigma": 2.3659271095815924,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.276083333333333,
+          "sigma": 1.8502201636439926,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.7989166666666667,
+          "sigma": 1.8447809413996592,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.6571000000000002,
+          "sigma": 1.5263477811929174,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.8684833333333333,
+          "sigma": 2.228068514386903,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.3027,
+          "sigma": 2.1790614236720343,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.16095,
+          "sigma": 1.311570716057788,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.0545833333333332,
+          "sigma": 1.736047940168984,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.246648471660844,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-16",
+      "true_change_point_utc": "2007-10-16T05:48:53.269781+00:00",
+      "true_change_point_local": "2007-10-16T07:48:53.269781+02:00",
+      "detected_change_point_utc": "2007-10-16T05:38:14+00:00",
+      "detected_change_point_local": "2007-10-16T07:38:14+02:00",
+      "signed_delay_minutes": -10.654496349999999,
+      "absolute_error_minutes": 10.654496349999999,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 885,
+      "baselines": {
+        "5": {
+          "mu": 0.9304833333333332,
+          "sigma": 0.9622142453501726,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.9305333333333332,
+          "sigma": 1.2133750166677433,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.40895,
+          "sigma": 1.390777960869627,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.5685166666666668,
+          "sigma": 1.8993968935005523,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.33675,
+          "sigma": 0.9233889612340043,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.8684666666666665,
+          "sigma": 0.9836712704768712,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.0014,
+          "sigma": 1.253966076907146,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.090083333333333,
+          "sigma": 1.2591299698893066,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.101380635759937,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-17",
+      "true_change_point_utc": "2007-10-17T05:50:14.281012+00:00",
+      "true_change_point_local": "2007-10-17T07:50:14.281012+02:00",
+      "detected_change_point_utc": "2007-10-17T05:36:09+00:00",
+      "detected_change_point_local": "2007-10-17T07:36:09+02:00",
+      "signed_delay_minutes": -14.088016866666667,
+      "absolute_error_minutes": 14.088016866666667,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 941,
+      "baselines": {
+        "5": {
+          "mu": 1.0634615384615387,
+          "sigma": 1.3023921198263684,
+          "n_pre_finite": 52,
+          "used": true
+        },
+        "25": {
+          "mu": 0.9571166666666665,
+          "sigma": 1.2567082383463886,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.71915,
+          "sigma": 1.5521134178481955,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.6127833333333332,
+          "sigma": 1.7620727018194156,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.4962666666666666,
+          "sigma": 1.249340787079285,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.9482666666666667,
+          "sigma": 1.3882838188144098,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 1.2141333333333333,
+          "sigma": 1.5169045137894481,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 1.0198360655737704,
+          "sigma": 1.292581837258643,
+          "n_pre_finite": 61,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.445662254280145,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-18",
+      "true_change_point_utc": "2007-10-18T05:51:35.602438+00:00",
+      "true_change_point_local": "2007-10-18T07:51:35.602438+02:00",
+      "detected_change_point_utc": "2007-10-18T04:15:34+00:00",
+      "detected_change_point_local": "2007-10-18T06:15:34+02:00",
+      "signed_delay_minutes": -96.0267073,
+      "absolute_error_minutes": 96.0267073,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "28",
+        "3"
+      ],
+      "grid_points": 889,
+      "baselines": {
+        "5": {
+          "mu": 0.8232903225806448,
+          "sigma": 1.2540774205072522,
+          "n_pre_finite": 62,
+          "used": true
+        },
+        "25": {
+          "mu": 0.7887,
+          "sigma": 1.1437498733907496,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.5242000000000002,
+          "sigma": 1.6453739959172438,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.0633333333333332,
+          "sigma": 0.8810308612818699,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.4696666666666666,
+          "sigma": 1.1504061282377651,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.8152333333333334,
+          "sigma": 0.87809138875498,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": 0.9571000000000001,
+          "sigma": 1.3663383914682334,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.709,
+          "sigma": 0.8458624121800087,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 8.097031360405042,
+      "notes": [
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-19",
+      "true_change_point_utc": "2007-10-19T05:52:57.232986+00:00",
+      "true_change_point_local": "2007-10-19T07:52:57.232986+02:00",
+      "detected_change_point_utc": "2007-10-19T05:40:03+00:00",
+      "detected_change_point_local": "2007-10-19T07:40:03+02:00",
+      "signed_delay_minutes": -12.9038831,
+      "absolute_error_minutes": 12.9038831,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "3"
+      ],
+      "grid_points": 360,
+      "baselines": {
+        "5": {
+          "mu": 0.7709666666666666,
+          "sigma": 1.3401802682521593,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.90525,
+          "sigma": 1.7710811849148311,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 1.3381499999999997,
+          "sigma": 2.016998372519364,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.609440548704238,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 2: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    },
+    {
+      "date": "2007-10-20",
+      "true_change_point_utc": "2007-10-20T05:54:19.170461+00:00",
+      "true_change_point_local": "2007-10-20T07:54:19.170461+02:00",
+      "detected_change_point_utc": "2007-10-20T04:10:48+00:00",
+      "detected_change_point_local": "2007-10-20T06:10:48+02:00",
+      "signed_delay_minutes": -103.51950768333333,
+      "absolute_error_minutes": 103.51950768333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1082,
+      "baselines": {
+        "5": {
+          "mu": 0.895,
+          "sigma": 1.1644797776442375,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0988499999999999,
+          "sigma": 1.2377357789425725,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.3026166666666665,
+          "sigma": 1.1137057106287127,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.5596333333333336,
+          "sigma": 1.1495245290718477,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.9216166666666666,
+          "sigma": 1.1026033306689489,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.83305,
+          "sigma": 1.126305079918779,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.7355666666666667,
+          "sigma": 1.211230700172163,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.1963666666666666,
+          "sigma": 1.6104042125142417,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.06201666666666667,
+          "sigma": 0.24154050028273968,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.852139430098293,
+      "notes": []
+    },
+    {
+      "date": "2007-10-21",
+      "true_change_point_utc": "2007-10-21T05:55:41.411496+00:00",
+      "true_change_point_local": "2007-10-21T07:55:41.411496+02:00",
+      "detected_change_point_utc": "2007-10-21T03:58:05+00:00",
+      "detected_change_point_local": "2007-10-21T05:58:05+02:00",
+      "signed_delay_minutes": -117.60685826666666,
+      "absolute_error_minutes": 117.60685826666666,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 963,
+      "baselines": {
+        "5": {
+          "mu": 1.4710333333333332,
+          "sigma": 1.9975592476876871,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.9305333333333332,
+          "sigma": 1.0752080991590303,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.7014500000000001,
+          "sigma": 1.5748945988407055,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.7368166666666667,
+          "sigma": 1.6523166427331981,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 1.0190833333333333,
+          "sigma": 1.219909989617415,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 1.0723166666666666,
+          "sigma": 1.2669648436210657,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.73555,
+          "sigma": 1.5010551026482808,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.0988666666666664,
+          "sigma": 1.6052079802589463,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.20381666666666665,
+          "sigma": 0.5962318537669115,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 7.189539038331484,
+      "notes": []
+    },
+    {
+      "date": "2007-10-22",
+      "true_change_point_utc": "2007-10-22T05:57:03.951493+00:00",
+      "true_change_point_local": "2007-10-22T07:57:03.951493+02:00",
+      "detected_change_point_utc": "2007-10-22T04:14:38+00:00",
+      "detected_change_point_local": "2007-10-22T06:14:38+02:00",
+      "signed_delay_minutes": -102.43252488333333,
+      "absolute_error_minutes": 102.43252488333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1007,
+      "baselines": {
+        "5": {
+          "mu": 1.3176739130434783,
+          "sigma": 1.3853332700408685,
+          "n_pre_finite": 46,
+          "used": true
+        },
+        "25": {
+          "mu": 1.0634333333333332,
+          "sigma": 1.7402705650409716,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.3776136363636362,
+          "sigma": 1.0341126342303537,
+          "n_pre_finite": 44,
+          "used": true
+        },
+        "29": {
+          "mu": 1.4355666666666667,
+          "sigma": 1.0187816979228665,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 0.93935,
+          "sigma": 1.4696719664547766,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.7976,
+          "sigma": 1.1603496579969157,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.5064047619047618,
+          "sigma": 0.7514841594657806,
+          "n_pre_finite": 42,
+          "used": true
+        },
+        "28": {
+          "mu": 1.2849999999999997,
+          "sigma": 1.8888924564051834,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.12367441860465116,
+          "sigma": 0.5665867193294308,
+          "n_pre_finite": 43,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.610869700549292,
+      "notes": []
+    },
+    {
+      "date": "2007-10-23",
+      "true_change_point_utc": "2007-10-23T05:58:26.784564+00:00",
+      "true_change_point_local": "2007-10-23T07:58:26.784564+02:00",
+      "detected_change_point_utc": "2007-10-23T05:50:44+00:00",
+      "detected_change_point_local": "2007-10-23T07:50:44+02:00",
+      "signed_delay_minutes": -7.713076066666667,
+      "absolute_error_minutes": 7.713076066666667,
+      "status": "on_time",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1080,
+      "baselines": {
+        "5": {
+          "mu": 1.0456999999999999,
+          "sigma": 1.541546640250562,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.9747999999999999,
+          "sigma": 1.269533009030072,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.3912333333333333,
+          "sigma": 1.1993235715929755,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.6836833333333332,
+          "sigma": 1.3919215043578375,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 1.01025,
+          "sigma": 1.4243145199340332,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.6291999999999999,
+          "sigma": 1.079056631303159,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.7975499999999999,
+          "sigma": 1.1096765817578087,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 1.1431499999999999,
+          "sigma": 1.678037340496836,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.0886,
+          "sigma": 0.3414076146222194,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.966747361211489,
+      "notes": []
+    },
+    {
+      "date": "2007-10-24",
+      "true_change_point_utc": "2007-10-24T05:59:49.903480+00:00",
+      "true_change_point_local": "2007-10-24T07:59:49.903480+02:00",
+      "detected_change_point_utc": "2007-10-24T04:09:23+00:00",
+      "detected_change_point_local": "2007-10-24T06:09:23+02:00",
+      "signed_delay_minutes": -110.44839133333333,
+      "absolute_error_minutes": 110.44839133333333,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "grid_points": 1003,
+      "baselines": {
+        "5": {
+          "mu": 0.9570666666666666,
+          "sigma": 1.8672939440394294,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": 0.8419,
+          "sigma": 0.9852954594297496,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "4": {
+          "mu": 1.6748166666666668,
+          "sigma": 1.2023057578298186,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": 1.2583333333333333,
+          "sigma": 1.0722260333841305,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "32": {
+          "mu": 1.0634333333333332,
+          "sigma": 1.3913804676111123,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "31": {
+          "mu": 0.8773833333333333,
+          "sigma": 1.5535437029596721,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "2": {
+          "mu": 0.8773666666666666,
+          "sigma": 1.132536869855424,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": 0.8418833333333333,
+          "sigma": 1.1174130700904834,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "3": {
+          "mu": 0.12405,
+          "sigma": 0.5482474829330024,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 5.016001975301137,
+      "notes": []
+    },
+    {
+      "date": "2007-10-25",
+      "true_change_point_utc": "2007-10-25T06:01:13.299615+00:00",
+      "true_change_point_local": "2007-10-25T08:01:13.299615+02:00",
+      "detected_change_point_utc": "2007-10-25T05:13:16+00:00",
+      "detected_change_point_local": "2007-10-25T07:13:16+02:00",
+      "signed_delay_minutes": -47.954993583333334,
+      "absolute_error_minutes": 47.954993583333334,
+      "status": "false_alarm",
+      "false_alarm": true,
+      "missed_detection": false,
+      "active_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "used_sensors": [
+        "5",
+        "4",
+        "2",
+        "3"
+      ],
+      "grid_points": 480,
+      "baselines": {
+        "5": {
+          "mu": 1.1520833333333331,
+          "sigma": 1.757221673519595,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "25": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "4": {
+          "mu": 1.55085,
+          "sigma": 1.2277921596459782,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "29": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "32": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "31": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "2": {
+          "mu": 0.7533,
+          "sigma": 1.239445082230111,
+          "n_pre_finite": 60,
+          "used": true
+        },
+        "28": {
+          "mu": null,
+          "sigma": null,
+          "n_pre_finite": 0,
+          "used": false
+        },
+        "3": {
+          "mu": 0.17723333333333333,
+          "sigma": 0.8287649043405898,
+          "n_pre_finite": 60,
+          "used": true
+        }
+      },
+      "statistic_at_detection": 6.343637606951312,
+      "notes": [
+        "Sensor 25: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 29: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 32: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 31: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate.",
+        "Sensor 28: insufficient pre-sunrise samples (0 < 5); excluded from this day's aggregate."
+      ]
+    }
+  ],
+  "generated_at_utc": "2026-05-07T03:16:56.954966+00:00"
+}

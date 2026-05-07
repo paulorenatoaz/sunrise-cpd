@@ -1,0 +1,107 @@
+{
+  "generated_at_utc": "2026-05-07T03:51:15.116170+00:00",
+  "scenarios": [
+    {
+      "scenario_name": "low_budget",
+      "budget_regime": "low",
+      "selected_sensors": [
+        "5"
+      ],
+      "n_active_sensors": 1,
+      "detected_days_count": 36,
+      "missed_detection_count": 7,
+      "false_alarm_count": 7,
+      "mean_signed_delay_minutes": -8.112262936574076,
+      "median_signed_delay_minutes": -0.661427475,
+      "mean_absolute_error_minutes": 12.848523924537039,
+      "median_absolute_error_minutes": 3.6794685833333336,
+      "std_signed_delay_minutes": 23.459467639517815,
+      "min_signed_delay_minutes": -99.60155126666668,
+      "max_signed_delay_minutes": 17.02833975
+    },
+    {
+      "scenario_name": "medium_budget",
+      "budget_regime": "medium",
+      "selected_sensors": [
+        "5",
+        "25",
+        "4"
+      ],
+      "n_active_sensors": 3,
+      "detected_days_count": 42,
+      "missed_detection_count": 1,
+      "false_alarm_count": 17,
+      "mean_signed_delay_minutes": -31.099040564285712,
+      "median_signed_delay_minutes": -11.628574766666667,
+      "mean_absolute_error_minutes": 31.56115285952381,
+      "median_absolute_error_minutes": 11.628574766666667,
+      "std_signed_delay_minutes": 35.728342898014034,
+      "min_signed_delay_minutes": -110.48055048333335,
+      "max_signed_delay_minutes": 5.511673083333333
+    },
+    {
+      "scenario_name": "high_budget",
+      "budget_regime": "high",
+      "selected_sensors": [
+        "5",
+        "25",
+        "4",
+        "29",
+        "32",
+        "31",
+        "2",
+        "28",
+        "3"
+      ],
+      "n_active_sensors": 9,
+      "detected_days_count": 42,
+      "missed_detection_count": 1,
+      "false_alarm_count": 32,
+      "mean_signed_delay_minutes": -59.55419929444445,
+      "median_signed_delay_minutes": -61.17660230833333,
+      "mean_absolute_error_minutes": 59.55419929444445,
+      "median_absolute_error_minutes": 61.17660230833333,
+      "std_signed_delay_minutes": 39.84062478800366,
+      "min_signed_delay_minutes": -117.60685826666666,
+      "max_signed_delay_minutes": -3.7752913500000003
+    }
+  ],
+  "detector_signature": {
+    "detector_name": "one_sided_page_cusum_multi_sensor",
+    "detector_parameters": {
+      "drift_k": 0.5,
+      "min_baseline_samples": 5,
+      "fallback_sigma": 1.0,
+      "formula": "z_{i,t} = (x_{i,t} - mu_{0,i})/sigma_{0,i}; Z_t = mean_{i in S_t} z_{i,t}; S_t = max(0, S_{t-1} + Z_t - k); detect when S_t >= h."
+    },
+    "threshold": 5.0,
+    "tolerance_minutes": 15,
+    "analysis_window": {
+      "pre_window_minutes": 120,
+      "post_window_minutes": 120,
+      "sync_freq": "2min"
+    },
+    "aggregation": "mean_z",
+    "consistent_across_scenarios": true
+  },
+  "interpretation": {
+    "detected_days_trend": "monotonic_improvement",
+    "false_alarm_trend": "monotonic_increase",
+    "mean_absolute_error_trend": "monotonic_degradation",
+    "verdict": "degradation",
+    "findings": [
+      "Detected-days count grows monotonically with the budget.",
+      "False-alarm count rises monotonically with the budget."
+    ],
+    "candidate_factors": [
+      "redundant sensors among the top of the D_i ranking",
+      "noisy or unreliable individual sensors",
+      "missing observations on some days",
+      "averaging z-scores reduces variance but also dilutes a single strong signal",
+      "fixed CUSUM threshold (h) shared across regimes",
+      "the top-ranked sensor already captures most of the signal",
+      "weather variability (clouds, fog) on specific days",
+      "different sensor availability patterns across the deployment"
+    ]
+  }
+}
