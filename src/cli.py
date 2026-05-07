@@ -315,14 +315,16 @@ def cmd_run_sunrise_experiment(args: argparse.Namespace) -> int:
     )
     out_path = write_results(payload)
     agg = payload["aggregate_metrics"]
-    print(f"[run-sunrise-experiment] All valid sensors: "
-          f"{payload['all_valid_sensors']}")
-    print(f"[run-sunrise-experiment] Selection policy: "
-          f"{payload['selection_policy']}")
-    print(f"[run-sunrise-experiment] Selected sensors: "
-          f"{payload['selected_sensors']}")
-    print(f"[run-sunrise-experiment] Selection reason: "
-          f"{payload['selection_reason']}")
+    print(f"[run-sunrise-experiment] Candidate sensors: "
+          f"{payload['full_candidate_sensors']}")
+    print(f"[run-sunrise-experiment] Budget value B = "
+          f"{payload['budget_value']} ({payload['cost_model']})")
+    print(f"[run-sunrise-experiment] Dynamic selection: "
+          f"{payload['dynamic_selection']} | policy: "
+          f"greedy_information_per_cost")
+    sel_summary = payload.get("selected_sensors_summary", {})
+    print(f"[run-sunrise-experiment] Sensors ever selected: "
+          f"{sel_summary.get('sensors_ever_selected')}")
     print(f"[run-sunrise-experiment] Days processed: {payload['number_of_days']}")
     print(f"[run-sunrise-experiment] Detected: {agg['detected_days_count']}, "
           f"missed: {agg['missed_detection_count']}, "

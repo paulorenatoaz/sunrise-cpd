@@ -37,6 +37,8 @@ _METRIC_FIELDS = [
     ("std_signed_delay_minutes", "Std signed delay [min]"),
     ("min_signed_delay_minutes", "Min signed delay [min]"),
     ("max_signed_delay_minutes", "Max signed delay [min]"),
+    ("mean_active_sensors_per_timestamp", "Mean |S(t)|"),
+    ("mean_budget_used_per_timestamp", "Mean budget used"),
 ]
 
 
@@ -49,12 +51,23 @@ def _load(path: Path) -> dict | None:
 
 def _summary_row(scenario: str, payload: dict) -> dict:
     agg = payload.get("aggregate_metrics", {})
-    selected = payload.get("selected_sensors", [])
+    sel_summary = payload.get("selected_sensors_summary", {}) or {}
+    ever = sel_summary.get("sensors_ever_selected", []) or []
+    most_freq = sel_summary.get("most_frequently_selected_sensors", []) or []
     row = {
         "scenario_name": payload.get("scenario_name"),
         "budget_regime": scenario,
-        "selected_sensors": list(selected),
-        "n_active_sensors": len(selected),
+        "budget_value": payload.get("budget_value"),
+        "cost_model": payload.get("cost_model"),
+        "dynamic_selection": payload.get("dynamic_selection"),
+        "selection_policy": payload.get("selection_policy"),
+        "full_candidate_sensors": list(
+            payload.get("full_candidate_sensors", [])),
+        "sensors_ever_selected": list(ever),
+        "most_frequently_selected_sensors": [
+            f"{r['sensor_id']} (n={r['selection_count']})"
+            for r in most_freq[:5]
+        ],
     }
     for key, _ in _METRIC_FIELDS:
         row[key] = agg.get(key)
@@ -327,16 +340,20 @@ def render_comparison_report(out_path: Path = COMPARISON_HTML,
 
     # Comparison table.
     headers = [
-        "Scenario", "Budget regime", "Selected sensors",
-        "# active sensors",
+        "Scenario", "Budget regime", "Budget B", "Cost model",
+        "Candidate sensors", "Sensors ever selected",
+        "Most frequently selected",
     ] + [label for _, label in _METRIC_FIELDS]
     rows = []
     for s in scenarios:
         row = [
             s.get("scenario_name"),
             s.get("budget_regime"),
-            s.get("selected_sensors"),
-            s.get("n_active_sensors"),
+            s.get("budget_value"),
+            s.get("cost_model"),
+            s.get("full_candidate_sensors"),
+            s.get("sensors_ever_selected"),
+            s.get("most_frequently_selected_sensors"),
         ]
         for key, _ in _METRIC_FIELDS:
             row.append(s.get(key))
@@ -381,11 +398,14 @@ def render_comparison_report(out_path: Path = COMPARISON_HTML,
         "<li>Detector parameters and the analysis window are held fixed "
         "across budget regimes to isolate the effect of the sensor "
         "budget.</li>"
-        "<li>Sensing and communication costs C_i, T_i are not available "
-        "in the dataset; unit costs are assumed.</li>"
-        "<li>The aggregation rule (mean of finite z-scores) treats all "
-        "active sensors symmetrically; weighted aggregation by D_i is "
-        "not part of the present configuration.</li>"
+        "<li>Sensing and communication costs C_i, T_i are not measured "
+        "in the dataset; the explicit unit-cost assumption "
+        "C_i = 1.0, T_i = 0.0 is recorded in "
+        "<code>output/json/sensor_costs.json</code>.</li>"
+        "<li>The aggregation rule (mean of finite per-sensor LLRs over "
+        "the dynamic subset S(t)) treats all active sensors symmetrically; "
+        "weighted aggregation by D_i is not part of the present "
+        "configuration.</li>"
         "<li>The evaluation addresses the non-adversarial "
         "resource-constrained setting; the covert adversarial model is "
         "not analyzed.</li>"

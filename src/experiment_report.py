@@ -61,21 +61,20 @@ GOAL_STATEMENT = (
 )
 _SCENARIO_HEADLINE = {
     "low": (
-        "Low budget. The same multi-sensor model is used. The only "
-        "difference is the budget policy, which allows activating a "
-        "single sensor — the top-1 by D_i."
+        "Low budget. The same multi-sensor network is available; at "
+        "each timestamp the dynamic budget policy may activate at most "
+        "one sensor (B = 1.0 under the unit-cost approximation). The "
+        "chosen sensor may vary across timestamps and days."
     ),
     "medium": (
-        "The medium-budget regime uses the same multi-sensor model as "
-        "the low- and high-budget regimes. The only difference is the "
-        "budget policy, which allows activating a subset of k sensors. "
-        "In this run, k = {k} and the selected sensors are the top {k} "
-        "sensors according to D_i."
+        "Medium budget. At each timestamp the dynamic budget policy "
+        "may activate up to three sensors (B = 3.0 under the unit-cost "
+        "approximation). The active subset S(t) may vary over time."
     ),
     "high": (
-        "The high-budget regime uses the same multi-sensor model as the "
-        "other regimes. The only difference is the budget policy, which "
-        "allows activating all valid sensors."
+        "High budget. The dynamic budget policy uses B equal to the "
+        "number of valid sensors, so all available sensors may be "
+        "activated at every timestamp."
     ),
 }
 
@@ -135,10 +134,18 @@ def _load(path: Path) -> dict | None:
 # ---------------------------------------------------------------------------
 
 def _build_example_plot(results: dict) -> Path | None:
-    """Render an example detection plot for the first detected day."""
+    """Render an example detection plot for the first detected day.
+
+    The plot shows the sensors most frequently selected across the run
+    (up to five) for context, and the aggregated CUSUM trajectory.
+    """
     if not paths.SYNCHRONIZED_PARQUET.exists():
         return None
-    selected = [str(s) for s in results.get("selected_sensors", [])]
+    most_freq = (results.get("selected_sensors_summary", {})
+                 .get("most_frequently_selected_sensors", []))
+    selected = [str(r["sensor_id"]) for r in most_freq[:5]]
+    if not selected:
+        selected = [str(s) for s in results.get("full_candidate_sensors", [])][:5]
     if not selected:
         return None
     per_day = results.get("per_day_results", [])
@@ -217,7 +224,7 @@ def _build_example_plot(results: dict) -> Path | None:
     sensor_tag = "-".join(selected)
     asset_path = (paths.ASSETS_DIR
                   / f"example_detection_{results['budget_regime']}"
-                    f"_{sensor_tag}_{target['date']}.png")
+                    f"_top_{sensor_tag}_{target['date']}.png")
     fig, axes = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
     for sid, series in sensor_series.items():
         axes[0].plot(series.index, series.values, label=f"Sensor {sid}")
@@ -229,7 +236,8 @@ def _build_example_plot(results: dict) -> Path | None:
     axes[0].legend(loc="upper left", fontsize=8)
     axes[0].set_title(
         f"Example day {target['date']} — "
-        f"{results['budget_regime']} budget, sensors {selected}"
+        f"{results['budget_regime']} budget, B={results.get('budget_value')}, "
+        f"top sensors {selected}"
     )
 
     axes[1].plot(grid, stat, color="#7a1f1f", label="Aggregated CUSUM S_t")
@@ -275,7 +283,7 @@ def render_scenario_report(scenario: str,
             f"Results JSON missing for scenario {scenario!r}: {json_path}"
         )
 
-    headline = _SCENARIO_HEADLINE[scenario].format(k=results.get("k"))
+    headline = _SCENARIO_HEADLINE[scenario]
     sections: list[str] = []
 
     sections.append(_section(
@@ -331,54 +339,85 @@ def render_scenario_report(scenario: str,
         "4. Multi-Sensor Model and Budget Regimes",
         f"<div class='statement'>{escape(headline)}</div>"
         "<p>The unified experiment always loads the full set of valid "
-        "sensors. A budget policy then chooses the active subset:</p>"
+        "sensors. A dynamic budget policy then selects the active "
+        "subset <code>S(t)</code> at every timestamp under the "
+        "explicit budget constraint "
+        "<code>sum_{i in S(t)} (C_i + T_i) &lt;= B</code>:</p>"
         "<ul>"
-        "<li><strong>Low budget</strong>: top-1 sensor by D_i.</li>"
-        "<li><strong>Medium budget</strong>: top-k sensors by D_i.</li>"
-        "<li><strong>High budget</strong>: every valid sensor.</li>"
+        "<li><strong>Low budget</strong>: <code>B = 1.0</code> "
+        "(unit-cost approximation).</li>"
+        "<li><strong>Medium budget</strong>: <code>B = 3.0</code> "
+        "(unit-cost approximation).</li>"
+        "<li><strong>High budget</strong>: <code>B = |valid sensors|</code> "
+        "so the constraint is non-binding.</li>"
         "</ul>"
-        "<p>Costs <code>C_i</code> and <code>T_i</code> are not "
-        "available, so unit cost is assumed; this is equivalent to "
-        "ranking by <code>D_i / (C_i + T_i)</code> with "
-        "<code>C_i + T_i = 1</code>.</p>"
+        "<p>Sensing and communication costs <code>C_i</code>, "
+        "<code>T_i</code> are not measured in the dataset; the report "
+        "applies the explicit unit-cost assumption "
+        "<code>C_i = 1.0, T_i = 0.0</code> stored in "
+        "<code>output/json/sensor_costs.json</code>. The selection "
+        "policy ranks available sensors by "
+        "<code>D_i / (C_i + T_i)</code> and greedily picks "
+        "<code>S(t)</code> while the cumulative cost stays "
+        "within <code>B</code>.</p>"
     ))
 
     ranking_rows = [
-        [r["rank"], r["sensor_id"], r.get("D_i")]
+        [r.get("rank"), r.get("sensor_id"), r.get("D_i"),
+         r.get("total_cost"), r.get("score")]
         for r in results.get("sensor_ranking", [])
     ]
+    sel_summary = results.get("selected_sensors_summary", {}) or {}
+    most_freq = sel_summary.get("most_frequently_selected_sensors", [])
+    most_freq_str = ", ".join(
+        f"{r['sensor_id']} (n={r['selection_count']})" for r in most_freq
+    ) or "n/a"
+    cost_rows = [
+        [c.get("sensor_id"), c.get("sensing_cost"),
+         c.get("communication_cost"), c.get("total_cost"),
+         c.get("cost_source")]
+        for c in results.get("sensor_costs", [])
+    ]
     sections.append(_section(
-        "5. Budget Policy and Selected Sensors",
+        "5. Dynamic Budget Policy",
         _table(["Field", "Value"], [
             ["Budget regime", results["budget_regime"]],
             ["Description", results["budget_description"]],
+            ["Budget value B", results.get("budget_value")],
+            ["Budget constraint", results.get("budget_constraint")],
+            ["Cost model", results.get("cost_model")],
+            ["Unit cost assumption", results.get("unit_cost_assumption")],
+            ["Dynamic selection", results.get("dynamic_selection")],
             ["Selection policy", results["selection_policy"]],
-            ["Unit cost assumption", results["unit_cost_assumption"]],
-            ["All valid sensors",
-             ", ".join(results.get("all_valid_sensors", []))],
-            ["Selected sensors",
-             ", ".join(results.get("selected_sensors", []))],
-            ["Number of active sensors",
-             len(results.get("selected_sensors", []))],
-            ["Selection reason", results["selection_reason"]],
-            ["Detector input mode", results["detector_input_mode"]],
+            ["Score",
+             (results.get("selection_policy_config") or {}).get("score_name")],
+            ["Candidate sensors",
+             ", ".join(results.get("full_candidate_sensors", []))],
+            ["Sensors ever selected",
+             ", ".join(sel_summary.get("sensors_ever_selected", []))],
+            ["Most frequently selected sensors", most_freq_str],
+            ["Detector input mode", results.get("detector_input_mode")],
         ])
-        + "<h3>Sensor ranking by D_i</h3>"
-        + _table(["Rank", "Sensor ID", "D_i"], ranking_rows)
+        + "<h3>Sensor cost model</h3>"
+        + _table(["Sensor ID", "C_i", "T_i", "C_i + T_i", "Source"],
+                 cost_rows)
+        + "<h3>Sensor ranking by information-per-cost</h3>"
+        + _table(["Rank", "Sensor ID", "D_i", "C_i + T_i",
+                  "D_i / (C_i + T_i)"], ranking_rows)
     ))
 
-    # Per-sensor empirical statistics for the selected sensors.
+    # Per-sensor empirical statistics for all candidate sensors.
     if info is not None:
         info_by_id = {str(s.get("sensor_id")): s
                       for s in info.get("sensors", [])}
         rows = []
-        for sid in results.get("selected_sensors", []):
+        for sid in results.get("full_candidate_sensors", []):
             s = info_by_id.get(str(sid)) or {}
             rows.append([sid, s.get("D_i"), s.get("mu_0"), s.get("mu_1"),
                          s.get("sigma2"), s.get("n_valid_days"),
                          s.get("missing_rate")])
         sections.append(_section(
-            "6. Selected Sensors — Per-Sensor Empirical Statistics",
+            "6. Candidate Sensors — Per-Sensor Empirical Statistics",
             _table(["Sensor", "D_i", "mu_0", "mu_1", "sigma^2",
                     "Valid days", "Missing rate"], rows)
         ))
@@ -451,7 +490,8 @@ def render_scenario_report(scenario: str,
     head = ("<tr>" + "".join(f"<th>{h}</th>" for h in [
         "Date", "Sunrise (local)", "Detected (local)",
         "Signed delay [min]", "|Error| [min]", "Status",
-        "False alarm", "Missed", "Active sensors", "Used", "Grid pts",
+        "False alarm", "Missed", "Sensors ever selected",
+        "Avg |S(t)|", "Avg budget", "Grid pts",
     ]) + "</tr>")
     body_rows = []
     for p in results["per_day_results"]:
@@ -466,8 +506,9 @@ def render_scenario_report(scenario: str,
             f"{escape(p['status'])}</span></td>"
             f"<td>{p['false_alarm']}</td>"
             f"<td>{p['missed_detection']}</td>"
-            f"<td>{escape(','.join(p.get('active_sensors', [])))}</td>"
-            f"<td>{escape(','.join(p.get('used_sensors', [])))}</td>"
+            f"<td>{escape(','.join(p.get('sensors_ever_selected', [])))}</td>"
+            f"<td>{_fmt(p.get('average_active_sensors_per_timestamp'))}</td>"
+            f"<td>{_fmt(p.get('average_budget_used'))}</td>"
             f"<td>{p['grid_points']}</td>"
             "</tr>"
         )
@@ -486,9 +527,11 @@ def render_scenario_report(scenario: str,
         "analysis window, synchronization frequency, and missing-data "
         "handling) are held fixed across budget regimes to isolate the "
         "effect of the sensor budget.</li>"
-        "<li>Sensing and communication costs C_i, T_i are not available "
-        "in the dataset; unit costs are assumed, so ranking by "
-        "D_i / (C_i + T_i) reduces to ranking by D_i.</li>"
+        "<li>Sensing and communication costs C_i, T_i are not measured "
+        "in the dataset; the explicit unit-cost assumption "
+        "C_i = 1.0, T_i = 0.0 (total cost 1.0) is recorded in "
+        "<code>output/json/sensor_costs.json</code>, so the dynamic "
+        "information-per-cost score reduces to D_i.</li>"
         "<li>The evaluation addresses the non-adversarial "
         "resource-constrained setting; the covert adversarial model is "
         "not analyzed.</li>"

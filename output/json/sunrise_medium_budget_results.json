@@ -1,9 +1,20 @@
 {
   "scenario_name": "medium_budget",
   "budget_regime": "medium",
-  "budget_description": "Medium budget. The sampling policy may activate a small subset of sensors (top-k by D_i) from the full valid sensor set.",
-  "selection_policy": "Rank candidate sensors by D_i (Gaussian divergence at sunrise) and pick the top entries allowed by the budget. Costs C_i and T_i are not available, so unit cost is assumed; this is equivalent to ranking by D_i / (C_i + T_i) with C_i + T_i = 1.",
-  "all_valid_sensors": [
+  "budget_description": "Medium budget. The dynamic budget policy enforces sum_{i in S(t)} (C_i + T_i) <= B with B = 3.0 under the unit-cost approximation, so up to three available sensors are activated per timestamp. The active subset may vary over time.",
+  "budget_value": 3.0,
+  "budget_constraint": "sum_{i in S(t)} (C_i + T_i) <= B",
+  "cost_model": "unit_cost_assumption",
+  "unit_cost_assumption": true,
+  "dynamic_selection": true,
+  "selection_policy": "Dynamic information-per-cost selection. At each timestamp t, the policy ranks the available sensors by D_i / (C_i + T_i) and greedily selects S(t) under the budget constraint.",
+  "selection_policy_config": {
+    "regime": "medium",
+    "budget": 3.0,
+    "unit_cost_assumption": true,
+    "score_name": "D_i_per_total_cost"
+  },
+  "full_candidate_sensors": [
     "2",
     "25",
     "28",
@@ -14,105 +25,217 @@
     "4",
     "5"
   ],
-  "selected_sensors": [
-    "5",
-    "25",
-    "4"
-  ],
-  "selection_reason": "Medium-budget policy: selected the top-3 sensors by D_i out of 9 valid sensors.",
   "sensor_ranking": [
     {
       "sensor_id": "5",
       "D_i": 1.0371523658852024,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 1.0371523658852024,
       "rank": 1
     },
     {
       "sensor_id": "25",
       "D_i": 0.8266125755853037,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.8266125755853037,
       "rank": 2
     },
     {
       "sensor_id": "4",
       "D_i": 0.71644127450863,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.71644127450863,
       "rank": 3
     },
     {
       "sensor_id": "29",
       "D_i": 0.6941987935469671,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.6941987935469671,
       "rank": 4
     },
     {
       "sensor_id": "32",
       "D_i": 0.6309357336660095,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.6309357336660095,
       "rank": 5
     },
     {
       "sensor_id": "31",
       "D_i": 0.5841832668691657,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.5841832668691657,
       "rank": 6
     },
     {
       "sensor_id": "2",
       "D_i": 0.5382499174368247,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.5382499174368247,
       "rank": 7
     },
     {
       "sensor_id": "28",
       "D_i": 0.5229958019413189,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.5229958019413189,
       "rank": 8
     },
     {
       "sensor_id": "3",
       "D_i": 0.466889297756536,
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
       "score": 0.466889297756536,
       "rank": 9
     }
   ],
-  "unit_cost_assumption": true,
-  "k": 3,
+  "sensor_costs": [
+    {
+      "sensor_id": "2",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "25",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "28",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "29",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "3",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "31",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "32",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "4",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "5",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    }
+  ],
+  "selected_sensors_summary": {
+    "sensors_ever_selected": [
+      "2",
+      "25",
+      "28",
+      "29",
+      "3",
+      "31",
+      "32",
+      "4",
+      "5"
+    ],
+    "most_frequently_selected_sensors": [
+      {
+        "sensor_id": "3",
+        "selection_count": 3829
+      },
+      {
+        "sensor_id": "4",
+        "selection_count": 3829
+      },
+      {
+        "sensor_id": "5",
+        "selection_count": 3250
+      },
+      {
+        "sensor_id": "28",
+        "selection_count": 2525
+      },
+      {
+        "sensor_id": "29",
+        "selection_count": 2522
+      },
+      {
+        "sensor_id": "32",
+        "selection_count": 2522
+      },
+      {
+        "sensor_id": "25",
+        "selection_count": 2520
+      },
+      {
+        "sensor_id": "31",
+        "selection_count": 2520
+      },
+      {
+        "sensor_id": "2",
+        "selection_count": 2429
+      }
+    ]
+  },
   "detector_input_mode": "multi_sensor",
   "detector_mode": "global_gaussian_llr",
-  "detector_name": "global_gaussian_llr_cusum_multi_sensor",
-  "aggregation": "mean_llr",
-  "detector_aggregation": "mean_llr",
+  "detector_name": "dynamic_budget_gaussian_llr_cusum_multi_sensor",
+  "aggregation": "mean_llr_over_dynamic_subset",
   "evidence_type": "gaussian_log_likelihood_ratio",
   "parameter_source": "global_empirical_sensor_parameters",
   "global_parameter_file": "output/json/sensor_informativeness.json",
-  "global_sensor_parameters_used": {
-    "5": {
-      "mu_0": 1.1199025450300053,
-      "mu_1": 23.656973022832133,
-      "sigma2": 244.86254981827784,
-      "sigma": 15.648084541511073,
-      "D_i": 1.0371523658852024
-    },
-    "25": {
-      "mu_0": 1.0802169188861985,
-      "mu_1": 80.03638614363778,
-      "sigma2": 3770.857619867092,
-      "sigma": 61.40730917298927,
-      "D_i": 0.8266125755853037
-    },
-    "4": {
-      "mu_0": 1.5831602453102456,
-      "mu_1": 104.41427937729502,
-      "sigma2": 7379.697009492346,
-      "sigma": 85.90516288030858,
-      "D_i": 0.71644127450863
-    }
-  },
-  "detector_aggregation_description": "At each timestamp, compute the per-sensor Gaussian log-likelihood ratio llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2) using fixed global empirical parameters, then average across active sensors with finite readings. Apply the one-sided CUSUM S_t = max(0, S_{t-1} + L_t) and detect when S_t >= h.",
+  "detector_aggregation_description": "At each timestamp t, the dynamic budget policy selects S(t) by greedy information-per-cost ranking under the constraint sum_{i in S(t)} (C_i + T_i) <= B. The detector then computes the per-sensor Gaussian LLR llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2) using fixed global empirical parameters and averages over the sensors in S(t) that report a finite reading. The aggregated evidence drives a one-sided CUSUM S_t = max(0, S_{t-1} + L_t) with no drift; detection occurs when S_t >= h.",
   "detector_parameters": {
     "evidence_type": "gaussian_log_likelihood_ratio",
-    "formula": "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2); L_t = mean_{i in S_t} llr_{i,t}; S_t = max(0, S_{t-1} + L_t); detect when S_t >= h."
+    "selection_policy": "greedy_information_per_cost",
+    "formula": "S(t) = greedy_select_by(D_i/(C_i+T_i)) subject to sum (C_i+T_i) <= B; llr_{i,t} = ((x_{i,t}-mu_{0,i})^2 - (x_{i,t}-mu_{1,i})^2) / (2 sigma_i^2); L_t = mean_{i in S(t)} llr_{i,t}; S_t = max(0, S_{t-1} + L_t); detect when S_t >= h."
   },
   "threshold": 5.0,
   "tolerance_minutes": 15,
@@ -122,21 +245,23 @@
     "sync_freq": "2min"
   },
   "number_of_days": 43,
-  "number_of_detected_days": 41,
-  "number_of_missed_detections": 2,
+  "number_of_detected_days": 42,
+  "number_of_missed_detections": 1,
   "number_of_false_alarms": 0,
   "aggregate_metrics": {
     "valid_days_count": 43,
-    "detected_days_count": 41,
-    "missed_detection_count": 2,
+    "detected_days_count": 42,
+    "missed_detection_count": 1,
     "false_alarm_count": 0,
-    "mean_signed_delay_minutes": 60.65419232276423,
-    "median_signed_delay_minutes": 63.34705073333334,
-    "mean_absolute_error_minutes": 60.65419232276423,
-    "median_absolute_error_minutes": 63.34705073333334,
-    "std_signed_delay_minutes": 15.363730727674968,
-    "min_signed_delay_minutes": 28.388706483333333,
-    "max_signed_delay_minutes": 92.934942
+    "mean_signed_delay_minutes": 62.9715943563492,
+    "median_signed_delay_minutes": 65.339351375,
+    "mean_absolute_error_minutes": 62.9715943563492,
+    "median_absolute_error_minutes": 65.339351375,
+    "std_signed_delay_minutes": 16.453661252020655,
+    "min_signed_delay_minutes": 28.398448733333332,
+    "max_signed_delay_minutes": 113.13507773333335,
+    "mean_active_sensors_per_timestamp": 1.011718924661651,
+    "mean_budget_used_per_timestamp": 1.0358074704869284
   },
   "per_day_results": [
     {
@@ -150,18 +275,28 @@
       "status": "missed_detection",
       "false_alarm": false,
       "missed_detection": true,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [],
+      "sensors_ever_selected": [],
+      "sensor_selection_counts": {},
+      "average_active_sensors_per_timestamp": 0.0,
+      "average_budget_used": null,
+      "timestamps_without_selection": null,
+      "evaluated_timestamps": null,
       "grid_points": 0,
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ],
-      "sensor_parameters_used": {}
+      ]
     },
     {
       "date": "2007-09-14",
@@ -174,90 +309,85 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "sensors_ever_selected": [
+        "3",
         "4"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
-      ],
-      "grid_points": 120,
-      "statistic_at_detection": 6.665505349894478,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 93,
+        "31": 0,
+        "32": 0,
+        "4": 93,
+        "5": 0
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 186,
+      "grid_points": 240,
+      "statistic_at_detection": 6.759219126966626,
+      "notes": []
     },
     {
       "date": "2007-09-15",
       "true_change_point_utc": "2007-09-15T05:09:07.087765+00:00",
       "true_change_point_local": "2007-09-15T07:09:07.087765+02:00",
-      "detected_change_point_utc": "2007-09-15T06:11:43+00:00",
-      "detected_change_point_local": "2007-09-15T08:11:43+02:00",
-      "signed_delay_minutes": 62.59853725,
-      "absolute_error_minutes": 62.59853725,
+      "detected_change_point_utc": "2007-09-15T06:03:32+00:00",
+      "detected_change_point_local": "2007-09-15T08:03:32+02:00",
+      "signed_delay_minutes": 54.41520391666666,
+      "absolute_error_minutes": 54.41520391666666,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "sensors_ever_selected": [
+        "2",
+        "3",
         "4"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
-      ],
-      "grid_points": 120,
-      "statistic_at_detection": 6.285078133615048,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 87,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 88,
+        "31": 0,
+        "32": 0,
+        "4": 87,
+        "5": 0
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 262,
+      "grid_points": 360,
+      "statistic_at_detection": 5.7956197227797075,
+      "notes": []
     },
     {
       "date": "2007-09-16",
@@ -270,138 +400,132 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "sensors_ever_selected": [
+        "2",
+        "3",
         "4"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
-      ],
-      "grid_points": 120,
-      "statistic_at_detection": 6.477875718291926,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 92,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 93,
+        "31": 0,
+        "32": 0,
+        "4": 93,
+        "5": 0
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 278,
+      "grid_points": 360,
+      "statistic_at_detection": 5.898340433415627,
+      "notes": []
     },
     {
       "date": "2007-09-17",
       "true_change_point_utc": "2007-09-17T05:11:36.219033+00:00",
       "true_change_point_local": "2007-09-17T07:11:36.219033+02:00",
-      "detected_change_point_utc": "2007-09-17T06:37:35+00:00",
-      "detected_change_point_local": "2007-09-17T08:37:35+02:00",
-      "signed_delay_minutes": 85.97968278333333,
-      "absolute_error_minutes": 85.97968278333333,
+      "detected_change_point_utc": "2007-09-17T06:15:35+00:00",
+      "detected_change_point_local": "2007-09-17T08:15:35+02:00",
+      "signed_delay_minutes": 63.97968278333334,
+      "absolute_error_minutes": 63.97968278333334,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "sensors_ever_selected": [
+        "2",
+        "3",
         "4"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
-      ],
-      "grid_points": 120,
-      "statistic_at_detection": 5.118945451995745,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 92,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 92,
+        "31": 0,
+        "32": 0,
+        "4": 92,
+        "5": 0
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 276,
+      "grid_points": 360,
+      "statistic_at_detection": 5.162125162097942,
+      "notes": []
     },
     {
       "date": "2007-09-18",
       "true_change_point_utc": "2007-09-18T05:12:50.895336+00:00",
       "true_change_point_local": "2007-09-18T07:12:50.895336+02:00",
-      "detected_change_point_utc": null,
-      "detected_change_point_local": null,
-      "signed_delay_minutes": null,
-      "absolute_error_minutes": null,
-      "status": "missed_detection",
+      "detected_change_point_utc": "2007-09-18T07:05:59+00:00",
+      "detected_change_point_local": "2007-09-18T09:05:59+02:00",
+      "signed_delay_minutes": 113.13507773333335,
+      "absolute_error_minutes": 113.13507773333335,
+      "status": "detected",
       "false_alarm": false,
-      "missed_detection": true,
-      "active_sensors": [
-        "5",
+      "missed_detection": false,
+      "candidate_sensors": [
+        "2",
         "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "sensors_ever_selected": [
+        "2",
+        "3",
         "4"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
-      ],
-      "grid_points": 120,
-      "statistic_at_detection": null,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 117,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 117,
+        "31": 0,
+        "32": 0,
+        "4": 117,
+        "5": 0
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 351,
+      "grid_points": 360,
+      "statistic_at_detection": 5.51809317526635,
+      "notes": []
     },
     {
       "date": "2007-09-19",
@@ -414,90 +538,87 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "sensors_ever_selected": [
+        "2",
+        "3",
         "4"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
-      ],
-      "grid_points": 120,
-      "statistic_at_detection": 6.5815889220609805,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 92,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 93,
+        "31": 0,
+        "32": 0,
+        "4": 93,
+        "5": 0
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 278,
+      "grid_points": 360,
+      "statistic_at_detection": 5.02798807975385,
+      "notes": []
     },
     {
       "date": "2007-09-20",
       "true_change_point_utc": "2007-09-20T05:15:20.517481+00:00",
       "true_change_point_local": "2007-09-20T07:15:20.517481+02:00",
-      "detected_change_point_utc": "2007-09-20T06:19:45+00:00",
-      "detected_change_point_local": "2007-09-20T08:19:45+02:00",
-      "signed_delay_minutes": 64.40804198333333,
-      "absolute_error_minutes": 64.40804198333333,
+      "detected_change_point_utc": "2007-09-20T06:21:45+00:00",
+      "detected_change_point_local": "2007-09-20T08:21:45+02:00",
+      "signed_delay_minutes": 66.40804198333333,
+      "absolute_error_minutes": 66.40804198333333,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "2",
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 5.740937071345804,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 93,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 95,
+        "31": 0,
+        "32": 0,
+        "4": 94,
+        "5": 93
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 375,
+      "grid_points": 481,
+      "statistic_at_detection": 6.72832513304524,
+      "notes": []
     },
     {
       "date": "2007-09-21",
@@ -510,42 +631,41 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "2",
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 6.2123735420033,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 92,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 93,
+        "31": 0,
+        "32": 0,
+        "4": 93,
+        "5": 93
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 371,
+      "grid_points": 480,
+      "statistic_at_detection": 5.1623541439543965,
+      "notes": []
     },
     {
       "date": "2007-09-22",
@@ -558,90 +678,88 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "2",
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 7.122411990725458,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 93,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 93,
+        "31": 0,
+        "32": 0,
+        "4": 93,
+        "5": 93
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 372,
+      "grid_points": 480,
+      "statistic_at_detection": 6.0797981586953975,
+      "notes": []
     },
     {
       "date": "2007-09-23",
       "true_change_point_utc": "2007-09-23T05:19:05.775271+00:00",
       "true_change_point_local": "2007-09-23T07:19:05.775271+02:00",
-      "detected_change_point_utc": "2007-09-23T06:06:28+00:00",
-      "detected_change_point_local": "2007-09-23T08:06:28+02:00",
-      "signed_delay_minutes": 47.37041215,
-      "absolute_error_minutes": 47.37041215,
+      "detected_change_point_utc": "2007-09-23T06:08:28+00:00",
+      "detected_change_point_local": "2007-09-23T08:08:28+02:00",
+      "signed_delay_minutes": 49.37041215,
+      "absolute_error_minutes": 49.37041215,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "2",
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 5.098713354703635,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 85,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 85,
+        "31": 0,
+        "32": 0,
+        "4": 85,
+        "5": 85
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 340,
+      "grid_points": 480,
+      "statistic_at_detection": 5.304524076358047,
+      "notes": []
     },
     {
       "date": "2007-09-24",
@@ -654,42 +772,41 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "2",
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 5.985162569166691,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 92,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 93,
+        "31": 0,
+        "32": 0,
+        "4": 93,
+        "5": 93
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 371,
+      "grid_points": 480,
+      "statistic_at_detection": 5.1466368771580795,
+      "notes": []
     },
     {
       "date": "2007-09-25",
@@ -702,90 +819,93 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "2",
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 5.904462643138917,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 105,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 103,
+        "31": 0,
+        "32": 0,
+        "4": 104,
+        "5": 104
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 416,
+      "grid_points": 481,
+      "statistic_at_detection": 6.01047814437781,
+      "notes": []
     },
     {
       "date": "2007-09-26",
       "true_change_point_utc": "2007-09-26T05:22:52.270695+00:00",
       "true_change_point_local": "2007-09-26T07:22:52.270695+02:00",
-      "detected_change_point_utc": "2007-09-26T06:48:35+00:00",
-      "detected_change_point_local": "2007-09-26T08:48:35+02:00",
-      "signed_delay_minutes": 85.71215508333333,
-      "absolute_error_minutes": 85.71215508333333,
+      "detected_change_point_utc": "2007-09-26T06:50:35+00:00",
+      "detected_change_point_local": "2007-09-26T08:50:35+02:00",
+      "signed_delay_minutes": 87.71215508333333,
+      "absolute_error_minutes": 87.71215508333333,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 359,
-      "statistic_at_detection": 7.056529486078864,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 104,
+        "25": 103,
+        "28": 105,
+        "29": 103,
+        "3": 104,
+        "31": 103,
+        "32": 103,
+        "4": 104,
+        "5": 104
+      },
+      "average_active_sensors_per_timestamp": 1.0506756756756757,
+      "average_budget_used": 1.0506756756756757,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 888,
+      "grid_points": 1032,
+      "statistic_at_detection": 5.684894750799549,
+      "notes": []
     },
     {
       "date": "2007-09-27",
@@ -798,618 +918,666 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.838266330046561,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 75,
+        "25": 74,
+        "28": 75,
+        "29": 74,
+        "3": 74,
+        "31": 74,
+        "32": 75,
+        "4": 74,
+        "5": 75
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 670,
+      "grid_points": 1078,
+      "statistic_at_detection": 5.327727780386105,
+      "notes": []
     },
     {
       "date": "2007-09-28",
       "true_change_point_utc": "2007-09-28T05:25:24.094824+00:00",
       "true_change_point_local": "2007-09-28T07:25:24.094824+02:00",
-      "detected_change_point_utc": "2007-09-28T06:12:28+00:00",
-      "detected_change_point_local": "2007-09-28T08:12:28+02:00",
-      "signed_delay_minutes": 47.06508626666667,
-      "absolute_error_minutes": 47.06508626666667,
+      "detected_change_point_utc": "2007-09-28T06:10:28+00:00",
+      "detected_change_point_local": "2007-09-28T08:10:28+02:00",
+      "signed_delay_minutes": 45.06508626666667,
+      "absolute_error_minutes": 45.06508626666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 6.115790813486769,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 83,
+        "25": 82,
+        "28": 83,
+        "29": 83,
+        "3": 83,
+        "31": 83,
+        "32": 83,
+        "4": 83,
+        "5": 83
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 746,
+      "grid_points": 1080,
+      "statistic_at_detection": 5.5309805813205255,
+      "notes": []
     },
     {
       "date": "2007-09-29",
       "true_change_point_utc": "2007-09-29T05:26:40.286271+00:00",
       "true_change_point_local": "2007-09-29T07:26:40.286271+02:00",
-      "detected_change_point_utc": "2007-09-29T06:25:09+00:00",
-      "detected_change_point_local": "2007-09-29T08:25:09+02:00",
-      "signed_delay_minutes": 58.47856215,
-      "absolute_error_minutes": 58.47856215,
+      "detected_change_point_utc": "2007-09-29T06:21:08+00:00",
+      "detected_change_point_local": "2007-09-29T08:21:08+02:00",
+      "signed_delay_minutes": 54.461895483333336,
+      "absolute_error_minutes": 54.461895483333336,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 6.538552304389528,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 87,
+        "25": 88,
+        "28": 87,
+        "29": 87,
+        "3": 87,
+        "31": 87,
+        "32": 87,
+        "4": 87,
+        "5": 87
+      },
+      "average_active_sensors_per_timestamp": 1.0129198966408268,
+      "average_budget_used": 1.0129198966408268,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 774,
+      "grid_points": 1070,
+      "statistic_at_detection": 6.232146756015777,
+      "notes": []
     },
     {
       "date": "2007-09-30",
       "true_change_point_utc": "2007-09-30T05:27:56.677611+00:00",
       "true_change_point_local": "2007-09-30T07:27:56.677611+02:00",
-      "detected_change_point_utc": "2007-09-30T05:56:20+00:00",
-      "detected_change_point_local": "2007-09-30T07:56:20+02:00",
-      "signed_delay_minutes": 28.388706483333333,
-      "absolute_error_minutes": 28.388706483333333,
+      "detected_change_point_utc": "2007-09-30T06:06:20+00:00",
+      "detected_change_point_local": "2007-09-30T08:06:20+02:00",
+      "signed_delay_minutes": 38.38870648333333,
+      "absolute_error_minutes": 38.38870648333333,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 359,
-      "statistic_at_detection": 5.606123345035713,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 80,
+        "25": 79,
+        "28": 80,
+        "29": 79,
+        "3": 79,
+        "31": 79,
+        "32": 80,
+        "4": 79,
+        "5": 80
+      },
+      "average_active_sensors_per_timestamp": 1.0127478753541077,
+      "average_budget_used": 1.0127478753541077,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 706,
+      "grid_points": 1070,
+      "statistic_at_detection": 6.0554914777793165,
+      "notes": []
     },
     {
       "date": "2007-10-01",
       "true_change_point_utc": "2007-10-01T05:29:13.278867+00:00",
       "true_change_point_local": "2007-10-01T07:29:13.278867+02:00",
-      "detected_change_point_utc": "2007-10-01T06:12:32+00:00",
-      "detected_change_point_local": "2007-10-01T08:12:32+02:00",
-      "signed_delay_minutes": 43.31201888333333,
-      "absolute_error_minutes": 43.31201888333333,
+      "detected_change_point_utc": "2007-10-01T06:18:32+00:00",
+      "detected_change_point_local": "2007-10-01T08:18:32+02:00",
+      "signed_delay_minutes": 49.31201888333333,
+      "absolute_error_minutes": 49.31201888333333,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.538178398871507,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 85,
+        "25": 85,
+        "28": 85,
+        "29": 85,
+        "3": 85,
+        "31": 85,
+        "32": 85,
+        "4": 85,
+        "5": 85
+      },
+      "average_active_sensors_per_timestamp": 1.0866477272727273,
+      "average_budget_used": 1.0866477272727273,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 704,
+      "grid_points": 986,
+      "statistic_at_detection": 5.268703099988501,
+      "notes": []
     },
     {
       "date": "2007-10-02",
       "true_change_point_utc": "2007-10-02T05:30:30.099847+00:00",
       "true_change_point_local": "2007-10-02T07:30:30.099847+02:00",
-      "detected_change_point_utc": "2007-10-02T06:33:14+00:00",
-      "detected_change_point_local": "2007-10-02T08:33:14+02:00",
-      "signed_delay_minutes": 62.73166921666667,
-      "absolute_error_minutes": 62.73166921666667,
+      "detected_change_point_utc": "2007-10-02T06:24:03+00:00",
+      "detected_change_point_local": "2007-10-02T08:24:03+02:00",
+      "signed_delay_minutes": 53.54833588333334,
+      "absolute_error_minutes": 53.54833588333334,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.55561439837906,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 86,
+        "25": 87,
+        "28": 86,
+        "29": 87,
+        "3": 87,
+        "31": 87,
+        "32": 86,
+        "4": 87,
+        "5": 86
+      },
+      "average_active_sensors_per_timestamp": 1.0012853470437018,
+      "average_budget_used": 1.0012853470437018,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 778,
+      "grid_points": 1080,
+      "statistic_at_detection": 5.401620388537777,
+      "notes": []
     },
     {
       "date": "2007-10-03",
       "true_change_point_utc": "2007-10-03T05:31:47.150105+00:00",
       "true_change_point_local": "2007-10-03T07:31:47.150105+02:00",
-      "detected_change_point_utc": "2007-10-03T06:04:27+00:00",
-      "detected_change_point_local": "2007-10-03T08:04:27+02:00",
-      "signed_delay_minutes": 32.66416491666667,
-      "absolute_error_minutes": 32.66416491666667,
+      "detected_change_point_utc": "2007-10-03T06:06:27+00:00",
+      "detected_change_point_local": "2007-10-03T08:06:27+02:00",
+      "signed_delay_minutes": 34.664164916666664,
+      "absolute_error_minutes": 34.664164916666664,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.959949809260634,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 78,
+        "25": 77,
+        "28": 78,
+        "29": 78,
+        "3": 77,
+        "31": 77,
+        "32": 78,
+        "4": 77,
+        "5": 78
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 698,
+      "grid_points": 1081,
+      "statistic_at_detection": 5.419876673253418,
+      "notes": []
     },
     {
       "date": "2007-10-04",
       "true_change_point_utc": "2007-10-04T05:33:04.438893+00:00",
       "true_change_point_local": "2007-10-04T07:33:04.438893+02:00",
-      "detected_change_point_utc": "2007-10-04T06:46:28+00:00",
-      "detected_change_point_local": "2007-10-04T08:46:28+02:00",
-      "signed_delay_minutes": 73.39268511666667,
-      "absolute_error_minutes": 73.39268511666667,
+      "detected_change_point_utc": "2007-10-04T06:50:28+00:00",
+      "detected_change_point_local": "2007-10-04T08:50:28+02:00",
+      "signed_delay_minutes": 77.39268511666667,
+      "absolute_error_minutes": 77.39268511666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.861430722696656,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 99,
+        "25": 99,
+        "28": 99,
+        "29": 99,
+        "3": 99,
+        "31": 99,
+        "32": 99,
+        "4": 99,
+        "5": 99
+      },
+      "average_active_sensors_per_timestamp": 1.036046511627907,
+      "average_budget_used": 1.036046511627907,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 860,
+      "grid_points": 1049,
+      "statistic_at_detection": 6.113148899793005,
+      "notes": []
     },
     {
       "date": "2007-10-05",
       "true_change_point_utc": "2007-10-05T05:34:21.975123+00:00",
       "true_change_point_local": "2007-10-05T07:34:21.975123+02:00",
-      "detected_change_point_utc": "2007-10-05T06:16:24+00:00",
-      "detected_change_point_local": "2007-10-05T08:16:24+02:00",
-      "signed_delay_minutes": 42.03374795,
-      "absolute_error_minutes": 42.03374795,
+      "detected_change_point_utc": "2007-10-05T06:17:29+00:00",
+      "detected_change_point_local": "2007-10-05T08:17:29+02:00",
+      "signed_delay_minutes": 43.11708128333333,
+      "absolute_error_minutes": 43.11708128333333,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 361,
-      "statistic_at_detection": 5.403395878738035,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 81,
+        "25": 82,
+        "28": 81,
+        "29": 81,
+        "3": 82,
+        "31": 81,
+        "32": 81,
+        "4": 81,
+        "5": 82
+      },
+      "average_active_sensors_per_timestamp": 1.0990990990990992,
+      "average_budget_used": 1.0990990990990992,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 666,
+      "grid_points": 980,
+      "statistic_at_detection": 5.127874496468252,
+      "notes": []
     },
     {
       "date": "2007-10-06",
       "true_change_point_utc": "2007-10-06T05:35:39.767316+00:00",
       "true_change_point_local": "2007-10-06T07:35:39.767316+02:00",
-      "detected_change_point_utc": "2007-10-06T06:56:23+00:00",
-      "detected_change_point_local": "2007-10-06T08:56:23+02:00",
-      "signed_delay_minutes": 80.72054473333333,
-      "absolute_error_minutes": 80.72054473333333,
+      "detected_change_point_utc": "2007-10-06T06:54:23+00:00",
+      "detected_change_point_local": "2007-10-06T08:54:23+02:00",
+      "signed_delay_minutes": 78.72054473333333,
+      "absolute_error_minutes": 78.72054473333333,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 361,
-      "statistic_at_detection": 6.637256434606376,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 99,
+        "28": 100,
+        "29": 100,
+        "3": 99,
+        "31": 99,
+        "32": 100,
+        "4": 100,
+        "5": 100
+      },
+      "average_active_sensors_per_timestamp": 1.1434720229555237,
+      "average_budget_used": 1.1434720229555237,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 697,
+      "grid_points": 848,
+      "statistic_at_detection": 6.360730397327659,
+      "notes": []
     },
     {
       "date": "2007-10-07",
       "true_change_point_utc": "2007-10-07T05:36:57.823564+00:00",
       "true_change_point_local": "2007-10-07T07:36:57.823564+02:00",
-      "detected_change_point_utc": "2007-10-07T06:40:54+00:00",
-      "detected_change_point_local": "2007-10-07T08:40:54+02:00",
-      "signed_delay_minutes": 63.93627393333334,
-      "absolute_error_minutes": 63.93627393333334,
+      "detected_change_point_utc": "2007-10-07T06:44:54+00:00",
+      "detected_change_point_local": "2007-10-07T08:44:54+02:00",
+      "signed_delay_minutes": 67.93627393333334,
+      "absolute_error_minutes": 67.93627393333334,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.9452600887556795,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 94,
+        "28": 94,
+        "29": 94,
+        "3": 94,
+        "31": 94,
+        "32": 94,
+        "4": 94,
+        "5": 94
+      },
+      "average_active_sensors_per_timestamp": 1.1058823529411765,
+      "average_budget_used": 1.1058823529411765,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 680,
+      "grid_points": 870,
+      "statistic_at_detection": 5.967810744570894,
+      "notes": []
     },
     {
       "date": "2007-10-08",
       "true_change_point_utc": "2007-10-08T05:38:16.151474+00:00",
       "true_change_point_local": "2007-10-08T07:38:16.151474+02:00",
-      "detected_change_point_utc": "2007-10-08T06:40:51+00:00",
-      "detected_change_point_local": "2007-10-08T08:40:51+02:00",
-      "signed_delay_minutes": 62.58080876666667,
-      "absolute_error_minutes": 62.58080876666667,
+      "detected_change_point_utc": "2007-10-08T06:44:51+00:00",
+      "detected_change_point_local": "2007-10-08T08:44:51+02:00",
+      "signed_delay_minutes": 66.58080876666666,
+      "absolute_error_minutes": 66.58080876666666,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.540730804028258,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 94,
+        "28": 93,
+        "29": 93,
+        "3": 93,
+        "31": 93,
+        "32": 93,
+        "4": 93,
+        "5": 94
+      },
+      "average_active_sensors_per_timestamp": 1.1406727828746177,
+      "average_budget_used": 1.1406727828746177,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 654,
+      "grid_points": 841,
+      "statistic_at_detection": 5.195319880651423,
+      "notes": []
     },
     {
       "date": "2007-10-09",
       "true_change_point_utc": "2007-10-09T05:39:34.758125+00:00",
       "true_change_point_local": "2007-10-09T07:39:34.758125+02:00",
-      "detected_change_point_utc": "2007-10-09T06:15:02+00:00",
-      "detected_change_point_local": "2007-10-09T08:15:02+02:00",
-      "signed_delay_minutes": 35.45403125,
-      "absolute_error_minutes": 35.45403125,
+      "detected_change_point_utc": "2007-10-09T06:16:15+00:00",
+      "detected_change_point_local": "2007-10-09T08:16:15+02:00",
+      "signed_delay_minutes": 36.67069791666667,
+      "absolute_error_minutes": 36.67069791666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.096800432828234,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 78,
+        "28": 79,
+        "29": 79,
+        "3": 79,
+        "31": 78,
+        "32": 79,
+        "4": 79,
+        "5": 79
+      },
+      "average_active_sensors_per_timestamp": 1.0161290322580645,
+      "average_budget_used": 1.0161290322580645,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 620,
+      "grid_points": 915,
+      "statistic_at_detection": 6.404292681304473,
+      "notes": []
     },
     {
       "date": "2007-10-10",
@@ -1422,522 +1590,551 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.900152409973362,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 90,
+        "28": 90,
+        "29": 90,
+        "3": 90,
+        "31": 90,
+        "32": 90,
+        "4": 90,
+        "5": 90
+      },
+      "average_active_sensors_per_timestamp": 1.135646687697161,
+      "average_budget_used": 1.135646687697161,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 634,
+      "grid_points": 843,
+      "statistic_at_detection": 5.449401780602502,
+      "notes": []
     },
     {
       "date": "2007-10-11",
       "true_change_point_utc": "2007-10-11T05:42:12.833029+00:00",
       "true_change_point_local": "2007-10-11T07:42:12.833029+02:00",
-      "detected_change_point_utc": "2007-10-11T06:47:44+00:00",
-      "detected_change_point_local": "2007-10-11T08:47:44+02:00",
-      "signed_delay_minutes": 65.51944951666667,
-      "absolute_error_minutes": 65.51944951666667,
+      "detected_change_point_utc": "2007-10-11T06:49:44+00:00",
+      "detected_change_point_local": "2007-10-11T08:49:44+02:00",
+      "signed_delay_minutes": 67.51944951666667,
+      "absolute_error_minutes": 67.51944951666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.932505098751657,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 94,
+        "28": 93,
+        "29": 93,
+        "3": 93,
+        "31": 94,
+        "32": 93,
+        "4": 94,
+        "5": 94
+      },
+      "average_active_sensors_per_timestamp": 1.1419847328244275,
+      "average_budget_used": 1.1419847328244275,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 655,
+      "grid_points": 840,
+      "statistic_at_detection": 5.675867632883984,
+      "notes": []
     },
     {
       "date": "2007-10-12",
       "true_change_point_utc": "2007-10-12T05:43:32.312346+00:00",
       "true_change_point_local": "2007-10-12T07:43:32.312346+02:00",
-      "detected_change_point_utc": "2007-10-12T06:45:40+00:00",
-      "detected_change_point_local": "2007-10-12T08:45:40+02:00",
-      "signed_delay_minutes": 62.12812756666666,
-      "absolute_error_minutes": 62.12812756666666,
+      "detected_change_point_utc": "2007-10-12T06:46:18+00:00",
+      "detected_change_point_local": "2007-10-12T08:46:18+02:00",
+      "signed_delay_minutes": 62.761460899999996,
+      "absolute_error_minutes": 62.761460899999996,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 6.147466482232506,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 91,
+        "28": 92,
+        "29": 92,
+        "3": 92,
+        "31": 91,
+        "32": 92,
+        "4": 92,
+        "5": 92
+      },
+      "average_active_sensors_per_timestamp": 1.0874074074074074,
+      "average_budget_used": 1.0874074074074074,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 675,
+      "grid_points": 883,
+      "statistic_at_detection": 6.163030125030129,
+      "notes": []
     },
     {
       "date": "2007-10-13",
       "true_change_point_utc": "2007-10-13T05:44:52.092430+00:00",
       "true_change_point_local": "2007-10-13T07:44:52.092430+02:00",
-      "detected_change_point_utc": "2007-10-13T06:32:13+00:00",
-      "detected_change_point_local": "2007-10-13T08:32:13+02:00",
-      "signed_delay_minutes": 47.3484595,
-      "absolute_error_minutes": 47.3484595,
+      "detected_change_point_utc": "2007-10-13T06:36:13+00:00",
+      "detected_change_point_local": "2007-10-13T08:36:13+02:00",
+      "signed_delay_minutes": 51.3484595,
+      "absolute_error_minutes": 51.3484595,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 361,
-      "statistic_at_detection": 5.846125381452032,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 85,
+        "28": 86,
+        "29": 86,
+        "3": 86,
+        "31": 86,
+        "32": 86,
+        "4": 86,
+        "5": 87
+      },
+      "average_active_sensors_per_timestamp": 1.085173501577287,
+      "average_budget_used": 1.085173501577287,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 634,
+      "grid_points": 894,
+      "statistic_at_detection": 5.130027856055568,
+      "notes": []
     },
     {
       "date": "2007-10-14",
       "true_change_point_utc": "2007-10-14T05:46:12.176956+00:00",
       "true_change_point_local": "2007-10-14T07:46:12.176956+02:00",
-      "detected_change_point_utc": "2007-10-14T06:49:33+00:00",
-      "detected_change_point_local": "2007-10-14T08:49:33+02:00",
-      "signed_delay_minutes": 63.34705073333334,
-      "absolute_error_minutes": 63.34705073333334,
+      "detected_change_point_utc": "2007-10-14T06:57:34+00:00",
+      "detected_change_point_local": "2007-10-14T08:57:34+02:00",
+      "signed_delay_minutes": 71.3637174,
+      "absolute_error_minutes": 71.3637174,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 6.165154023067474,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 96,
+        "28": 95,
+        "29": 95,
+        "3": 95,
+        "31": 96,
+        "32": 95,
+        "4": 96,
+        "5": 95
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 763,
+      "grid_points": 960,
+      "statistic_at_detection": 5.480019754728405,
+      "notes": []
     },
     {
       "date": "2007-10-15",
       "true_change_point_utc": "2007-10-15T05:47:32.568759+00:00",
       "true_change_point_local": "2007-10-15T07:47:32.568759+02:00",
-      "detected_change_point_utc": "2007-10-15T06:49:45+00:00",
-      "detected_change_point_local": "2007-10-15T08:49:45+02:00",
-      "signed_delay_minutes": 62.207187350000005,
-      "absolute_error_minutes": 62.207187350000005,
+      "detected_change_point_utc": "2007-10-15T07:01:43+00:00",
+      "detected_change_point_local": "2007-10-15T09:01:43+02:00",
+      "signed_delay_minutes": 74.17385401666667,
+      "absolute_error_minutes": 74.17385401666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 359,
-      "statistic_at_detection": 5.9105493723403235,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 97,
+        "28": 97,
+        "29": 97,
+        "3": 97,
+        "31": 97,
+        "32": 97,
+        "4": 96,
+        "5": 97
+      },
+      "average_active_sensors_per_timestamp": 1.0078023407022108,
+      "average_budget_used": 1.0078023407022108,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 769,
+      "grid_points": 953,
+      "statistic_at_detection": 6.206170163074956,
+      "notes": []
     },
     {
       "date": "2007-10-16",
       "true_change_point_utc": "2007-10-16T05:48:53.269781+00:00",
       "true_change_point_local": "2007-10-16T07:48:53.269781+02:00",
-      "detected_change_point_utc": "2007-10-16T06:51:40+00:00",
-      "detected_change_point_local": "2007-10-16T08:51:40+02:00",
-      "signed_delay_minutes": 62.778836983333335,
-      "absolute_error_minutes": 62.778836983333335,
+      "detected_change_point_utc": "2007-10-16T07:10:52+00:00",
+      "detected_change_point_local": "2007-10-16T09:10:52+02:00",
+      "signed_delay_minutes": 81.97883698333334,
+      "absolute_error_minutes": 81.97883698333334,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 361,
-      "statistic_at_detection": 6.502851591630932,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 101,
+        "28": 101,
+        "29": 101,
+        "3": 101,
+        "31": 101,
+        "32": 101,
+        "4": 101,
+        "5": 102
+      },
+      "average_active_sensors_per_timestamp": 1.0757978723404256,
+      "average_budget_used": 1.0757978723404256,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 752,
+      "grid_points": 885,
+      "statistic_at_detection": 6.289745382237255,
+      "notes": []
     },
     {
       "date": "2007-10-17",
       "true_change_point_utc": "2007-10-17T05:50:14.281012+00:00",
       "true_change_point_local": "2007-10-17T07:50:14.281012+02:00",
-      "detected_change_point_utc": "2007-10-17T06:58:10+00:00",
-      "detected_change_point_local": "2007-10-17T08:58:10+02:00",
-      "signed_delay_minutes": 67.9286498,
-      "absolute_error_minutes": 67.9286498,
+      "detected_change_point_utc": "2007-10-17T07:03:37+00:00",
+      "detected_change_point_local": "2007-10-17T09:03:37+02:00",
+      "signed_delay_minutes": 73.37864979999999,
+      "absolute_error_minutes": 73.37864979999999,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 340,
-      "statistic_at_detection": 5.788315862047712,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 97,
+        "28": 97,
+        "29": 96,
+        "3": 97,
+        "31": 97,
+        "32": 96,
+        "4": 97,
+        "5": 78
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 755,
+      "grid_points": 941,
+      "statistic_at_detection": 5.685955841849942,
+      "notes": []
     },
     {
       "date": "2007-10-18",
       "true_change_point_utc": "2007-10-18T05:51:35.602438+00:00",
       "true_change_point_local": "2007-10-18T07:51:35.602438+02:00",
-      "detected_change_point_utc": "2007-10-18T06:56:59+00:00",
-      "detected_change_point_local": "2007-10-18T08:56:59+02:00",
-      "signed_delay_minutes": 65.38995936666667,
-      "absolute_error_minutes": 65.38995936666667,
+      "detected_change_point_utc": "2007-10-18T06:53:52+00:00",
+      "detected_change_point_local": "2007-10-18T08:53:52+02:00",
+      "signed_delay_minutes": 62.2732927,
+      "absolute_error_minutes": 62.2732927,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 362,
-      "statistic_at_detection": 6.257878543022615,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 91,
+        "28": 92,
+        "29": 91,
+        "3": 92,
+        "31": 91,
+        "32": 92,
+        "4": 91,
+        "5": 93
+      },
+      "average_active_sensors_per_timestamp": 1.0732064421669107,
+      "average_budget_used": 1.0732064421669107,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 683,
+      "grid_points": 889,
+      "statistic_at_detection": 5.171658330839159,
+      "notes": []
     },
     {
       "date": "2007-10-19",
       "true_change_point_utc": "2007-10-19T05:52:57.232986+00:00",
       "true_change_point_local": "2007-10-19T07:52:57.232986+02:00",
-      "detected_change_point_utc": "2007-10-19T06:57:31+00:00",
-      "detected_change_point_local": "2007-10-19T08:57:31+02:00",
-      "signed_delay_minutes": 64.56278356666667,
-      "absolute_error_minutes": 64.56278356666667,
+      "detected_change_point_utc": "2007-10-19T06:59:31+00:00",
+      "detected_change_point_local": "2007-10-19T08:59:31+02:00",
+      "signed_delay_minutes": 66.56278356666667,
+      "absolute_error_minutes": 66.56278356666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 5.376004320750321,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 0,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 93,
+        "31": 0,
+        "32": 0,
+        "4": 94,
+        "5": 93
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 280,
+      "grid_points": 360,
+      "statistic_at_detection": 7.084142127441085,
+      "notes": []
     },
     {
       "date": "2007-10-20",
       "true_change_point_utc": "2007-10-20T05:54:19.170461+00:00",
       "true_change_point_local": "2007-10-20T07:54:19.170461+02:00",
-      "detected_change_point_utc": "2007-10-20T07:00:15+00:00",
-      "detected_change_point_local": "2007-10-20T09:00:15+02:00",
-      "signed_delay_minutes": 65.93049231666666,
-      "absolute_error_minutes": 65.93049231666666,
+      "detected_change_point_utc": "2007-10-20T07:00:16+00:00",
+      "detected_change_point_local": "2007-10-20T09:00:16+02:00",
+      "signed_delay_minutes": 65.94715898333332,
+      "absolute_error_minutes": 65.94715898333332,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 363,
-      "statistic_at_detection": 6.078778909829367,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 93,
+        "25": 93,
+        "28": 93,
+        "29": 93,
+        "3": 93,
+        "31": 93,
+        "32": 93,
+        "4": 93,
+        "5": 94
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 838,
+      "grid_points": 1082,
+      "statistic_at_detection": 6.023549168632178,
+      "notes": []
     },
     {
       "date": "2007-10-21",
@@ -1950,235 +2147,250 @@
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.37425738788692,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 77,
+        "25": 77,
+        "28": 77,
+        "29": 78,
+        "3": 77,
+        "31": 78,
+        "32": 77,
+        "4": 77,
+        "5": 78
+      },
+      "average_active_sensors_per_timestamp": 1.1189710610932475,
+      "average_budget_used": 1.1189710610932475,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 622,
+      "grid_points": 963,
+      "statistic_at_detection": 5.334270326983544,
+      "notes": []
     },
     {
       "date": "2007-10-22",
       "true_change_point_utc": "2007-10-22T05:57:03.951493+00:00",
       "true_change_point_local": "2007-10-22T07:57:03.951493+02:00",
-      "detected_change_point_utc": "2007-10-22T07:08:19+00:00",
-      "detected_change_point_local": "2007-10-22T09:08:19+02:00",
-      "signed_delay_minutes": 71.25080845000001,
-      "absolute_error_minutes": 71.25080845000001,
+      "detected_change_point_utc": "2007-10-22T07:06:50+00:00",
+      "detected_change_point_local": "2007-10-22T09:06:50+02:00",
+      "signed_delay_minutes": 69.76747511666667,
+      "absolute_error_minutes": 69.76747511666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 329,
-      "statistic_at_detection": 5.43190109417738,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 73,
+        "25": 95,
+        "28": 95,
+        "29": 95,
+        "3": 75,
+        "31": 95,
+        "32": 95,
+        "4": 76,
+        "5": 82
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 781,
+      "grid_points": 1007,
+      "statistic_at_detection": 5.621759525620114,
+      "notes": []
     },
     {
       "date": "2007-10-23",
       "true_change_point_utc": "2007-10-23T05:58:26.784564+00:00",
       "true_change_point_local": "2007-10-23T07:58:26.784564+02:00",
-      "detected_change_point_utc": "2007-10-23T06:52:17+00:00",
-      "detected_change_point_local": "2007-10-23T08:52:17+02:00",
-      "signed_delay_minutes": 53.83692393333333,
-      "absolute_error_minutes": 53.83692393333333,
+      "detected_change_point_utc": "2007-10-23T06:58:17+00:00",
+      "detected_change_point_local": "2007-10-23T08:58:17+02:00",
+      "signed_delay_minutes": 59.83692393333333,
+      "absolute_error_minutes": 59.83692393333333,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 360,
-      "statistic_at_detection": 5.266774952162425,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 90,
+        "25": 90,
+        "28": 90,
+        "29": 90,
+        "3": 90,
+        "31": 90,
+        "32": 90,
+        "4": 90,
+        "5": 90
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 810,
+      "grid_points": 1080,
+      "statistic_at_detection": 5.929182275327889,
+      "notes": []
     },
     {
       "date": "2007-10-24",
       "true_change_point_utc": "2007-10-24T05:59:49.903480+00:00",
       "true_change_point_local": "2007-10-24T07:59:49.903480+02:00",
-      "detected_change_point_utc": "2007-10-24T07:32:46+00:00",
-      "detected_change_point_local": "2007-10-24T09:32:46+02:00",
-      "signed_delay_minutes": 92.934942,
-      "absolute_error_minutes": 92.934942,
+      "detected_change_point_utc": "2007-10-24T07:24:01+00:00",
+      "detected_change_point_local": "2007-10-24T09:24:01+02:00",
+      "signed_delay_minutes": 84.184942,
+      "absolute_error_minutes": 84.184942,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
+      "sensors_ever_selected": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "grid_points": 286,
-      "statistic_at_detection": 7.1987361906887815,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 102,
+        "25": 102,
+        "28": 102,
+        "29": 103,
+        "3": 102,
+        "31": 102,
+        "32": 102,
+        "4": 102,
+        "5": 102
+      },
+      "average_active_sensors_per_timestamp": 1.072345390898483,
+      "average_budget_used": 1.072345390898483,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 857,
+      "grid_points": 1003,
+      "statistic_at_detection": 5.823874204702317,
+      "notes": []
     },
     {
       "date": "2007-10-25",
       "true_change_point_utc": "2007-10-25T06:01:13.299615+00:00",
       "true_change_point_local": "2007-10-25T08:01:13.299615+02:00",
-      "detected_change_point_utc": "2007-10-25T07:04:16+00:00",
-      "detected_change_point_local": "2007-10-25T09:04:16+02:00",
-      "signed_delay_minutes": 63.045006416666666,
-      "absolute_error_minutes": 63.045006416666666,
+      "detected_change_point_utc": "2007-10-25T07:12:16+00:00",
+      "detected_change_point_local": "2007-10-25T09:12:16+02:00",
+      "signed_delay_minutes": 71.04500641666667,
+      "absolute_error_minutes": 71.04500641666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
-      "active_sensors": [
-        "5",
+      "candidate_sensors": [
+        "2",
         "25",
-        "4"
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "used_sensors": [
-        "5",
-        "25",
-        "4"
+      "sensors_ever_selected": [
+        "2",
+        "3",
+        "4",
+        "5"
       ],
-      "grid_points": 240,
-      "statistic_at_detection": 5.174190467994299,
-      "notes": [],
-      "sensor_parameters_used": {
-        "5": {
-          "used": true,
-          "mu_0": 1.1199025450300053,
-          "mu_1": 23.656973022832133,
-          "sigma2": 244.86254981827784,
-          "D_i": 1.0371523658852024
-        },
-        "25": {
-          "used": true,
-          "mu_0": 1.0802169188861985,
-          "mu_1": 80.03638614363778,
-          "sigma2": 3770.857619867092,
-          "D_i": 0.8266125755853037
-        },
-        "4": {
-          "used": true,
-          "mu_0": 1.5831602453102456,
-          "mu_1": 104.41427937729502,
-          "sigma2": 7379.697009492346,
-          "D_i": 0.71644127450863
-        }
-      }
+      "sensor_selection_counts": {
+        "2": 96,
+        "25": 0,
+        "28": 0,
+        "29": 0,
+        "3": 96,
+        "31": 0,
+        "32": 0,
+        "4": 95,
+        "5": 96
+      },
+      "average_active_sensors_per_timestamp": 1.0,
+      "average_budget_used": 1.0,
+      "timestamps_without_selection": 0,
+      "evaluated_timestamps": 383,
+      "grid_points": 480,
+      "statistic_at_detection": 5.616741922896712,
+      "notes": []
     }
   ],
-  "generated_at_utc": "2026-05-07T04:41:12.849047+00:00"
+  "generated_at_utc": "2026-05-07T05:15:20.995842+00:00"
 }

@@ -1,0 +1,71 @@
+{
+  "cost_model": "unit_cost_assumption",
+  "cost_model_description": "Default unit costs are used because the SensorScope dataset does not provide per-sensor sensing or communication costs.",
+  "default_sensing_cost": 1.0,
+  "default_communication_cost": 0.0,
+  "sensors": [
+    {
+      "sensor_id": "2",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "25",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "28",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "29",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "3",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "31",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "32",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "4",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    },
+    {
+      "sensor_id": "5",
+      "sensing_cost": 1.0,
+      "communication_cost": 0.0,
+      "total_cost": 1.0,
+      "cost_source": "unit_cost_assumption"
+    }
+  ]
+}

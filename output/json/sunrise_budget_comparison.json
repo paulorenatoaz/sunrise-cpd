@@ -1,59 +1,91 @@
 {
-  "generated_at_utc": "2026-05-07T04:41:28.115062+00:00",
+  "generated_at_utc": "2026-05-07T05:15:58.588809+00:00",
   "scenarios": [
     {
       "scenario_name": "low_budget",
       "budget_regime": "low",
-      "selected_sensors": [
+      "budget_value": 1.0,
+      "cost_model": "unit_cost_assumption",
+      "dynamic_selection": true,
+      "selection_policy": "Dynamic information-per-cost selection. At each timestamp t, the policy ranks the available sensors by D_i / (C_i + T_i) and greedily selects S(t) under the budget constraint.",
+      "full_candidate_sensors": [
+        "2",
+        "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
         "5"
       ],
-      "n_active_sensors": 1,
-      "detected_days_count": 34,
-      "missed_detection_count": 9,
+      "sensors_ever_selected": [
+        "2",
+        "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "most_frequently_selected_sensors": [
+        "4 (n=3758)",
+        "3 (n=3437)",
+        "5 (n=3240)",
+        "29 (n=2512)",
+        "25 (n=2509)"
+      ],
+      "detected_days_count": 42,
+      "missed_detection_count": 1,
       "false_alarm_count": 0,
-      "mean_signed_delay_minutes": 66.57920029754901,
-      "median_signed_delay_minutes": 63.560623633333336,
-      "mean_absolute_error_minutes": 66.57920029754901,
-      "median_absolute_error_minutes": 63.560623633333336,
-      "std_signed_delay_minutes": 29.146616828408344,
-      "min_signed_delay_minutes": 26.388706483333333,
-      "max_signed_delay_minutes": 115.34550365
+      "mean_signed_delay_minutes": 62.489451499206346,
+      "median_signed_delay_minutes": 65.339351375,
+      "mean_absolute_error_minutes": 62.489451499206346,
+      "median_absolute_error_minutes": 65.339351375,
+      "std_signed_delay_minutes": 16.116197531694066,
+      "min_signed_delay_minutes": 28.398448733333332,
+      "max_signed_delay_minutes": 113.13507773333335,
+      "mean_active_sensors_per_timestamp": 0.9767441860465116,
+      "mean_budget_used_per_timestamp": 1.0
     },
     {
       "scenario_name": "medium_budget",
       "budget_regime": "medium",
-      "selected_sensors": [
-        "5",
-        "25",
-        "4"
-      ],
-      "n_active_sensors": 3,
-      "detected_days_count": 41,
-      "missed_detection_count": 2,
-      "false_alarm_count": 0,
-      "mean_signed_delay_minutes": 60.65419232276423,
-      "median_signed_delay_minutes": 63.34705073333334,
-      "mean_absolute_error_minutes": 60.65419232276423,
-      "median_absolute_error_minutes": 63.34705073333334,
-      "std_signed_delay_minutes": 15.363730727674968,
-      "min_signed_delay_minutes": 28.388706483333333,
-      "max_signed_delay_minutes": 92.934942
-    },
-    {
-      "scenario_name": "high_budget",
-      "budget_regime": "high",
-      "selected_sensors": [
-        "5",
-        "25",
-        "4",
-        "29",
-        "32",
-        "31",
+      "budget_value": 3.0,
+      "cost_model": "unit_cost_assumption",
+      "dynamic_selection": true,
+      "selection_policy": "Dynamic information-per-cost selection. At each timestamp t, the policy ranks the available sensors by D_i / (C_i + T_i) and greedily selects S(t) under the budget constraint.",
+      "full_candidate_sensors": [
         "2",
+        "25",
         "28",
-        "3"
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
       ],
-      "n_active_sensors": 9,
+      "sensors_ever_selected": [
+        "2",
+        "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "most_frequently_selected_sensors": [
+        "3 (n=3829)",
+        "4 (n=3829)",
+        "5 (n=3250)",
+        "28 (n=2525)",
+        "29 (n=2522)"
+      ],
       "detected_days_count": 42,
       "missed_detection_count": 1,
       "false_alarm_count": 0,
@@ -63,18 +95,70 @@
       "median_absolute_error_minutes": 65.339351375,
       "std_signed_delay_minutes": 16.453661252020655,
       "min_signed_delay_minutes": 28.398448733333332,
-      "max_signed_delay_minutes": 113.13507773333335
+      "max_signed_delay_minutes": 113.13507773333335,
+      "mean_active_sensors_per_timestamp": 1.011718924661651,
+      "mean_budget_used_per_timestamp": 1.0358074704869284
+    },
+    {
+      "scenario_name": "high_budget",
+      "budget_regime": "high",
+      "budget_value": 9.0,
+      "cost_model": "unit_cost_assumption",
+      "dynamic_selection": true,
+      "selection_policy": "Dynamic information-per-cost selection. At each timestamp t, the policy ranks the available sensors by D_i / (C_i + T_i) and greedily selects S(t) under the budget constraint.",
+      "full_candidate_sensors": [
+        "2",
+        "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "sensors_ever_selected": [
+        "2",
+        "25",
+        "28",
+        "29",
+        "3",
+        "31",
+        "32",
+        "4",
+        "5"
+      ],
+      "most_frequently_selected_sensors": [
+        "3 (n=3829)",
+        "4 (n=3829)",
+        "5 (n=3250)",
+        "28 (n=2525)",
+        "29 (n=2522)"
+      ],
+      "detected_days_count": 42,
+      "missed_detection_count": 1,
+      "false_alarm_count": 0,
+      "mean_signed_delay_minutes": 62.9715943563492,
+      "median_signed_delay_minutes": 65.339351375,
+      "mean_absolute_error_minutes": 62.9715943563492,
+      "median_absolute_error_minutes": 65.339351375,
+      "std_signed_delay_minutes": 16.453661252020655,
+      "min_signed_delay_minutes": 28.398448733333332,
+      "max_signed_delay_minutes": 113.13507773333335,
+      "mean_active_sensors_per_timestamp": 1.011718924661651,
+      "mean_budget_used_per_timestamp": 1.0358074704869284
     }
   ],
   "detector_signature": {
     "detector_mode": "global_gaussian_llr",
-    "detector_name": "global_gaussian_llr_cusum_multi_sensor",
+    "detector_name": "dynamic_budget_gaussian_llr_cusum_multi_sensor",
     "evidence_type": "gaussian_log_likelihood_ratio",
     "parameter_source": "global_empirical_sensor_parameters",
     "global_parameter_file": "output/json/sensor_informativeness.json",
     "detector_parameters": {
       "evidence_type": "gaussian_log_likelihood_ratio",
-      "formula": "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2); L_t = mean_{i in S_t} llr_{i,t}; S_t = max(0, S_{t-1} + L_t); detect when S_t >= h."
+      "selection_policy": "greedy_information_per_cost",
+      "formula": "S(t) = greedy_select_by(D_i/(C_i+T_i)) subject to sum (C_i+T_i) <= B; llr_{i,t} = ((x_{i,t}-mu_{0,i})^2 - (x_{i,t}-mu_{1,i})^2) / (2 sigma_i^2); L_t = mean_{i in S(t)} llr_{i,t}; S_t = max(0, S_{t-1} + L_t); detect when S_t >= h."
     },
     "threshold": 5.0,
     "tolerance_minutes": 15,
@@ -83,16 +167,16 @@
       "post_window_minutes": 120,
       "sync_freq": "2min"
     },
-    "aggregation": "mean_llr",
+    "aggregation": "mean_llr_over_dynamic_subset",
     "consistent_across_scenarios": true
   },
   "interpretation": {
-    "detected_days_trend": "monotonic_improvement",
+    "detected_days_trend": "flat",
     "false_alarm_trend": "flat",
-    "mean_absolute_error_trend": "mixed",
-    "verdict": "partial_improvement",
+    "mean_absolute_error_trend": "monotonic_degradation",
+    "verdict": "degradation",
     "findings": [
-      "Detected-days count grows monotonically with the budget."
+      "All regimes detect the same number of days (42)."
     ],
     "candidate_factors": [
       "redundant sensors among the top of the D_i ranking",

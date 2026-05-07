@@ -55,37 +55,44 @@ The SensorScope archive is not redistributed in this repository. See
   (`detector_mode="daily_baseline_zscore"`) reproduces the legacy
   same-day pre-sunrise z-score CUSUM.
 * **Costs.** Sensing and communication costs `C_i`, `T_i` are not
-  available in the dataset; unit costs are assumed, so ranking by
-  `D_i / (C_i + T_i)` reduces to ranking by `D_i`.
+  measured in the dataset. The pipeline applies an explicit unit-cost
+  assumption (`C_i = 1.0`, `T_i = 0.0`, `total cost 1.0`) recorded in
+  [output/json/sensor_costs.json](output/json/sensor_costs.json), so
+  the information-per-cost score reduces to `D_i`.
 
 ## Budget regimes
 
-The same multi-sensor system is used in all regimes. Only the sensor
-selection policy changes:
+The same multi-sensor system is used in all regimes. Each regime is
+defined by an explicit numeric budget `B` over the per-sensor cost
+`C_i + T_i`. At every timestamp `t`, the dynamic budget policy in
+`src/budget.py` selects an active subset
+`S(t) ⊆ {1, …, M}` greedily by `D_i / (C_i + T_i)` under the
+constraint `Σ_{i ∈ S(t)} (C_i + T_i) ≤ B`. Selection is therefore
+*per-timestamp*, not a fixed sensor subset; the active sensor(s) may
+change over time depending on availability.
 
-| Regime    | Policy                                | Selected sensors (this run) |
-|-----------|---------------------------------------|-----------------------------|
-| Low       | Top-1 sensor by `D_i`                 | `5`                         |
-| Medium    | Top-`k` sensors by `D_i` (default 3)  | `5, 25, 4`                  |
-| High      | All valid sensors                     | all 9 valid sensors         |
+| Regime  | Budget `B`         | Typical `\|S(t)\|` (unit cost) |
+|---------|--------------------|--------------------------------|
+| Low     | `B = 1.0`          | up to 1 active sensor          |
+| Medium  | `B = 3.0`          | up to 3 active sensors         |
+| High    | `B = \|valid\|`    | all available sensors          |
 
 ## Summary of empirical results
 
 Aggregated over 43 valid days, with `tolerance = 15 min` and threshold
-`h = 5.0`:
+`h = 5.0`, under the unit-cost assumption:
 
-| Regime  | Detected | Missed | False alarms |
-|---------|----------|--------|--------------|
-| Low     | 34       | 9      | 0            |
-| Medium  | 41       | 2      | 0            |
-| High    | 42       | 1      | 0            |
+| Regime  | `B`  | Detected | Missed | False alarms |
+|---------|------|----------|--------|--------------|
+| Low     | 1.0  | 42       | 1      | 0            |
+| Medium  | 3.0  | 42       | 1      | 0            |
+| High    | 9.0  | 42       | 1      | 0            |
 
-Under this configuration, increasing the sampling budget recovers more
-true changes while pre-sunrise false alarms remain at zero across all
-regimes. This is an empirical observation specific to the present
-configuration (Gaussian LLR CUSUM with fixed global per-sensor
-parameters and unweighted mean-LLR aggregation) and should not be
-interpreted as a universal property of the framework. See
+The dynamic policy distributes the low-budget activations over the
+sensors that are actually available at each timestamp, rather than
+locking onto a single sensor for the whole run; the union of sensors
+ever selected at low budget covers the full valid sensor set across
+the 43 days. See
 [output/reports/sunrise_budget_comparison_report.html](output/reports/sunrise_budget_comparison_report.html)
 for the full comparison.
 

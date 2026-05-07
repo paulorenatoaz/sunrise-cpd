@@ -1,10 +1,15 @@
 """Unified multi-sensor sunrise change-point detection experiment.
 
-The experiment is one model with three resource regimes (low / medium /
-high). The runner always loads the *full* set of valid sensors plus the
-per-sensor informativeness ranking, asks the budget policy in
-:mod:`src.budget` to pick an active subset, then forwards that subset to
-the multi-sensor CUSUM detector in :mod:`src.detector`.
+The experiment is a single multi-sensor model with three resource
+regimes (low / medium / high). Each regime is defined by a numeric
+budget ``B`` over the sensing/communication cost ``C_i + T_i``; the
+active subset ``S(t)`` is selected dynamically at every timestamp by
+the budget policy in :mod:`src.budget` (greedy information-per-cost).
+The detector (:func:`src.detector.cusum_detect_dynamic_budget`)
+accumulates the per-sensor Gaussian log-likelihood ratio averaged over
+``S(t)`` in a one-sided CUSUM. Per-sensor Gaussian parameters are
+fixed global empirical estimates loaded from
+:data:`src.paths.SENSOR_INFORMATIVENESS_JSON`.
 """
 from __future__ import annotations
 
@@ -18,12 +23,17 @@ import numpy as np
 import pandas as pd
 
 from . import paths
-from .budget import BudgetSelection, select_sensors_by_budget
+from .budget import (
+    BudgetPolicyConfig,
+    SensorCost,
+    build_sensor_ranking,
+    load_sensor_costs,
+    regime_budget,
+    write_sensor_costs,
+)
 from .detector import (
-    DetectorConfig,
-    GlobalLLRConfig,
-    cusum_detect_multi_sensor,
-    cusum_detect_multi_sensor_global_params,
+    DynamicBudgetLLRConfig,
+    cusum_detect_dynamic_budget,
 )
 from .informativeness import load_global_sensor_parameters
 
@@ -44,18 +54,24 @@ _REGIME_OUTPUTS = {
 
 _REGIME_DESCRIPTIONS = {
     "low": (
-        "Low budget. The same multi-sensor network is available, but the "
-        "sampling policy may activate only one sensor. The budget policy "
-        "selects the single most informative sensor (top-1 by D_i) from "
-        "the full valid sensor set."
+        "Low budget. The same multi-sensor network is available at every "
+        "timestamp. The dynamic budget policy enforces "
+        "sum_{i in S(t)} (C_i + T_i) <= B with B = 1.0 under the "
+        "unit-cost approximation, so at most one available sensor is "
+        "activated per timestamp. The chosen sensor may vary across "
+        "timestamps and days depending on availability and "
+        "information-per-cost score."
     ),
     "medium": (
-        "Medium budget. The sampling policy may activate a small subset "
-        "of sensors (top-k by D_i) from the full valid sensor set."
+        "Medium budget. The dynamic budget policy enforces "
+        "sum_{i in S(t)} (C_i + T_i) <= B with B = 3.0 under the "
+        "unit-cost approximation, so up to three available sensors are "
+        "activated per timestamp. The active subset may vary over time."
     ),
     "high": (
-        "High budget. The sampling policy may activate every valid sensor "
-        "from the multi-sensor network."
+        "High budget. The dynamic budget policy uses B equal to the "
+        "number of valid sensors, so all available sensors may be "
+        "activated at every timestamp."
     ),
 }
 
@@ -70,10 +86,7 @@ def _classify(detected: datetime | None,
               window_end: datetime,
               tolerance_minutes: int
               ) -> tuple[str, bool, bool]:
-    """Classify a per-day detection outcome.
-
-    Returns ``(status, false_alarm_flag, missed_detection_flag)``.
-    """
+    """Classify a per-day detection outcome."""
     tol = timedelta(minutes=tolerance_minutes)
     if detected is None or not (window_start <= detected <= window_end):
         return "missed_detection", False, True
@@ -101,6 +114,12 @@ def _aggregate_metrics(per_day: list[dict]) -> dict:
     def _maybe(fn, arr):
         return float(fn(arr)) if arr.size else None
 
+    avg_active = [p.get("average_active_sensors_per_timestamp")
+                  for p in per_day
+                  if p.get("average_active_sensors_per_timestamp") is not None]
+    avg_budget = [p.get("average_budget_used") for p in per_day
+                  if p.get("average_budget_used") is not None]
+
     return {
         "valid_days_count": n_days,
         "detected_days_count": int(len(detections)),
@@ -115,6 +134,10 @@ def _aggregate_metrics(per_day: list[dict]) -> dict:
         ),
         "min_signed_delay_minutes": _maybe(np.min, delays),
         "max_signed_delay_minutes": _maybe(np.max, delays),
+        "mean_active_sensors_per_timestamp": (
+            float(np.mean(avg_active)) if avg_active else None),
+        "mean_budget_used_per_timestamp": (
+            float(np.mean(avg_budget)) if avg_budget else None),
     }
 
 
@@ -137,38 +160,29 @@ def _load_valid_sensors_and_informativeness() -> tuple[list[str], list[dict]]:
 
 
 def _build_window_matrix(sensor_df: pd.DataFrame,
-                         selected_sensors: list[str],
+                         candidate_sensors: list[str],
                          win_start: pd.Timestamp,
                          win_end: pd.Timestamp,
                          freq: str = "2min"
                          ) -> tuple[pd.DatetimeIndex, dict[str, np.ndarray]]:
-    """Build a sensor-aligned matrix for one daily window.
-
-    The processed long table stores raw (non-grid-aligned) timestamps,
-    so we use the *union* of the actual observation timestamps of the
-    selected sensors inside the window as the common axis. For
-    single-sensor (low) budgets this reduces exactly to that sensor's
-    own timestamps. ``freq`` is unused here but kept for forward
-    compatibility with grid-resampling strategies.
-    """
+    """Build a sensor-aligned matrix for one daily window."""
     sub = sensor_df[
         (sensor_df["timestamp_utc"] >= win_start)
         & (sensor_df["timestamp_utc"] <= win_end)
-        & (sensor_df["station_id"].isin(selected_sensors))
+        & (sensor_df["station_id"].isin(candidate_sensors))
     ]
     if sub.empty:
         empty = pd.DatetimeIndex([], tz="UTC")
-        return empty, {sid: np.array([]) for sid in selected_sensors}
+        return empty, {sid: np.array([]) for sid in candidate_sensors}
     grid = pd.DatetimeIndex(
         sorted(sub["timestamp_utc"].unique()), tz="UTC"
     )
     values_by_sensor: dict[str, np.ndarray] = {}
-    for sid in selected_sensors:
+    for sid in candidate_sensors:
         s = sub.loc[sub["station_id"] == sid, ["timestamp_utc", "value"]]
         if s.empty:
             values_by_sensor[sid] = np.full(len(grid), np.nan)
             continue
-        # Average duplicates if any, then reindex to the union grid.
         series = (s.groupby("timestamp_utc")["value"].mean()
                    .astype(float).sort_index().reindex(grid))
         values_by_sensor[sid] = series.to_numpy(dtype=float)
@@ -180,40 +194,33 @@ def _build_window_matrix(sensor_df: pd.DataFrame,
 # ---------------------------------------------------------------------------
 
 def run_experiment(regime: str,
-                   k: int = 3,
+                   k: int = 3,             # accepted for backward compat
                    pre_window_minutes: int = 120,
                    post_window_minutes: int = 120,
                    tolerance_minutes: int = 15,
                    threshold: float = 5.0,
-                   drift_k: float = 0.5,
+                   drift_k: float = 0.0,   # accepted for backward compat
                    sync_freq: str = "2min",
                    timezone_name: str = paths.GSB_TIMEZONE,
                    detector_mode: str = "global_gaussian_llr",
+                   budget: float | None = None,
                    ) -> dict:
     """Run the unified multi-sensor sunrise CPD experiment.
 
-    The main detector mode (``"global_gaussian_llr"``) uses fixed
-    global empirical Gaussian parameters per sensor, loaded from
-    :data:`paths.SENSOR_INFORMATIVENESS_JSON`. The legacy mode
-    ``"daily_baseline_zscore"`` is kept as a diagnostic.
-
-    Steps:
-        1. Load every valid sensor and the empirical D_i ranking.
-        2. Apply :func:`select_sensors_by_budget` for the requested
-           ``regime`` to obtain the active subset.
-        3. For each valid day, build a synchronized per-sensor matrix on
-           the ``[sunrise - pre, sunrise + post]`` window.
-        4. Run the chosen detector on the active subset.
-        5. Classify and aggregate results.
-
-    Returns:
-        JSON-serializable payload describing the experiment.
+    The full set of valid sensors is always passed to the detector. The
+    detector then consults the dynamic budget policy at every timestamp
+    to obtain ``S(t)`` under ``sum_{i in S(t)} (C_i + T_i) <= B``. The
+    numeric budget ``B`` for the regime is computed by
+    :func:`src.budget.regime_budget` unless overridden via ``budget``.
     """
     regime = regime.lower()
     if regime not in _REGIME_OUTPUTS:
         raise ValueError(f"Unknown regime: {regime!r}")
-    if detector_mode not in {"global_gaussian_llr", "daily_baseline_zscore"}:
-        raise ValueError(f"Unknown detector_mode: {detector_mode!r}")
+    if detector_mode != "global_gaussian_llr":
+        raise ValueError(
+            f"Unsupported detector_mode: {detector_mode!r}. The dynamic "
+            "budget policy currently only supports 'global_gaussian_llr'."
+        )
     if not paths.SYNCHRONIZED_PARQUET.exists():
         raise FileNotFoundError(
             f"Processed dataset missing: {paths.SYNCHRONIZED_PARQUET}."
@@ -223,107 +230,90 @@ def run_experiment(regime: str,
             f"Sunrise ground truth missing: {paths.SUNRISE_GROUND_TRUTH_JSON}."
         )
 
-    valid_sensors, info_records = _load_valid_sensors_and_informativeness()
+    valid_sensors, _info_records = _load_valid_sensors_and_informativeness()
     if not valid_sensors:
         raise RuntimeError("Preprocessing summary lists no valid sensors.")
 
-    selection: BudgetSelection = select_sensors_by_budget(
-        valid_sensors=valid_sensors,
-        sensor_informativeness=info_records,
-        regime=regime,
-        k=k,
-    )
-    selected_sensors = selection.selected_sensors
-    if not selected_sensors:
-        raise RuntimeError("Budget policy selected no sensors.")
-    logger.info("Budget regime '%s' selected sensors: %s",
-                regime, selected_sensors)
+    # Cost model: load if a sensor_costs.json exists; otherwise create
+    # default unit-cost records and persist them so the JSON is always
+    # available alongside the result files.
+    sensor_costs: dict[str, SensorCost] = load_sensor_costs()
+    missing_costs = [sid for sid in valid_sensors if sid not in sensor_costs]
+    if missing_costs:
+        for sid in missing_costs:
+            sensor_costs[sid] = SensorCost(sensor_id=sid)
+        write_sensor_costs({sid: sensor_costs[sid] for sid in valid_sensors})
 
+    # Global empirical Gaussian parameters per sensor.
+    global_params_all = load_global_sensor_parameters(
+        paths.SENSOR_INFORMATIVENESS_JSON
+    )
+    candidate_params = {
+        sid: global_params_all[sid]
+        for sid in valid_sensors if sid in global_params_all
+    }
+    missing_params = [sid for sid in valid_sensors
+                      if sid not in candidate_params]
+    if not candidate_params:
+        raise RuntimeError(
+            "No global Gaussian parameters available for the valid "
+            "sensors; run 'rank-sensors' first."
+        )
+    if missing_params:
+        logger.warning(
+            "Valid sensors without global parameters (excluded by the "
+            "detector candidate pool): %s", missing_params,
+        )
+
+    informativeness_map = {
+        sid: float(candidate_params[sid].get("D_i") or 0.0)
+        for sid in candidate_params
+    }
+    candidate_sensors = sorted(candidate_params.keys())
+
+    # Budget value and policy configuration.
+    if budget is None:
+        budget = regime_budget(regime, len(candidate_sensors))
+    policy_config = BudgetPolicyConfig(
+        regime=regime,
+        budget=float(budget),
+        unit_cost_assumption=all(
+            c.cost_source == "unit_cost_assumption"
+            for c in sensor_costs.values()
+        ),
+        score_name="D_i_per_total_cost",
+    )
+    detector_config = DynamicBudgetLLRConfig(
+        threshold=threshold, budget=float(budget),
+    )
+
+    sensor_ranking = build_sensor_ranking(
+        candidate_sensors, informativeness_map, sensor_costs)
+
+    aggregation_description = (
+        "At each timestamp t, the dynamic budget policy selects "
+        "S(t) by greedy information-per-cost ranking under the "
+        "constraint sum_{i in S(t)} (C_i + T_i) <= B. The detector then "
+        "computes the per-sensor Gaussian LLR "
+        "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) "
+        "/ (2 sigma_i^2) using fixed global empirical parameters and "
+        "averages over the sensors in S(t) that report a finite "
+        "reading. The aggregated evidence drives a one-sided CUSUM "
+        "S_t = max(0, S_{t-1} + L_t) with no drift; detection occurs "
+        "when S_t >= h."
+    )
+
+    # Load processed sensor data for the full candidate sensor set.
     long_df = pd.read_parquet(paths.SYNCHRONIZED_PARQUET)
     long_df["timestamp_utc"] = pd.to_datetime(long_df["timestamp_utc"],
                                               utc=True)
     long_df["station_id"] = long_df["station_id"].astype(str)
-    sensor_df = long_df[long_df["station_id"].isin(selected_sensors)].copy()
+    sensor_df = long_df[long_df["station_id"].isin(candidate_sensors)].copy()
     sensor_df = sensor_df.sort_values("timestamp_utc").reset_index(drop=True)
 
     with open(paths.SUNRISE_GROUND_TRUTH_JSON, "r", encoding="utf-8") as fh:
         gt = json.load(fh)
     sunrise_records = gt.get("records", [])
-
-    # Detector setup. The main mode uses fixed global empirical
-    # Gaussian parameters per sensor; the legacy mode uses a same-day
-    # pre-sunrise baseline and is kept as a diagnostic.
-    if detector_mode == "global_gaussian_llr":
-        global_params_all = load_global_sensor_parameters(
-            paths.SENSOR_INFORMATIVENESS_JSON
-        )
-        sensor_params = {
-            sid: global_params_all[sid]
-            for sid in selected_sensors if sid in global_params_all
-        }
-        missing_params = [sid for sid in selected_sensors
-                          if sid not in sensor_params]
-        if not sensor_params:
-            raise RuntimeError(
-                "No global Gaussian parameters available for the "
-                "selected sensors; run 'rank-sensors' first."
-            )
-        if missing_params:
-            logger.warning(
-                "Selected sensors without global parameters (skipped by "
-                "the detector): %s", missing_params,
-            )
-        llr_config = GlobalLLRConfig(threshold=threshold)
-        detector_name = llr_config.name
-        aggregation_name = llr_config.aggregation
-        evidence_type = llr_config.evidence_type
-        aggregation_description = (
-            "At each timestamp, compute the per-sensor Gaussian "
-            "log-likelihood ratio "
-            "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - "
-            "mu_{1,i})^2) / (2 sigma_i^2) using fixed global empirical "
-            "parameters, then average across active sensors with finite "
-            "readings. Apply the one-sided CUSUM "
-            "S_t = max(0, S_{t-1} + L_t) and detect when S_t >= h."
-        )
-        detector_parameters = {
-            "evidence_type": evidence_type,
-            "formula": (
-                "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - "
-                "(x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2); "
-                "L_t = mean_{i in S_t} llr_{i,t}; "
-                "S_t = max(0, S_{t-1} + L_t); "
-                "detect when S_t >= h."
-            ),
-        }
-        parameter_source = "global_empirical_sensor_parameters"
-    else:
-        legacy_config = DetectorConfig(threshold=threshold, drift_k=drift_k)
-        sensor_params = {}
-        detector_name = legacy_config.name
-        aggregation_name = legacy_config.aggregation
-        evidence_type = "per_day_pre_sunrise_baseline_zscore"
-        aggregation_description = (
-            "At each timestamp, compute the per-sensor standardized "
-            "evidence z_{i,t} = (x_{i,t} - mu_{0,i,daily}) / "
-            "sigma_{0,i,daily} from the same-day pre-sunrise baseline, "
-            "then average across active sensors with finite readings. "
-            "Apply the one-sided Page CUSUM "
-            "S_t = max(0, S_{t-1} + Z_t - k) and detect when S_t >= h."
-        )
-        detector_parameters = {
-            "drift_k": legacy_config.drift_k,
-            "min_baseline_samples": legacy_config.min_baseline_samples,
-            "fallback_sigma": legacy_config.fallback_sigma,
-            "evidence_type": evidence_type,
-            "formula": (
-                "z_{i,t} = (x_{i,t} - mu_{0,i})/sigma_{0,i}; "
-                "Z_t = mean_{i in S_t} z_{i,t}; "
-                "S_t = max(0, S_{t-1} + Z_t - k); "
-                "detect when S_t >= h."
-            ),
-        }
-        parameter_source = "per_day_pre_sunrise_baseline"
 
     tz_local = ZoneInfo(timezone_name)
     pre_td = timedelta(minutes=pre_window_minutes)
@@ -335,23 +325,17 @@ def run_experiment(regime: str,
         win_start = sunrise_utc - pre_td
         win_end = sunrise_utc + post_td
         grid, values_by_sensor = _build_window_matrix(
-            sensor_df, selected_sensors, win_start, win_end, freq=sync_freq,
+            sensor_df, candidate_sensors, win_start, win_end, freq=sync_freq,
         )
 
-        if detector_mode == "global_gaussian_llr":
-            result = cusum_detect_multi_sensor_global_params(
-                timestamps=list(grid),
-                values_by_sensor=values_by_sensor,
-                sensor_params=sensor_params,
-                config=llr_config,
-            )
-        else:
-            result = cusum_detect_multi_sensor(
-                timestamps=list(grid),
-                values_by_sensor=values_by_sensor,
-                sunrise_time=sunrise_utc,
-                config=legacy_config,
-            )
+        result = cusum_detect_dynamic_budget(
+            timestamps=list(grid),
+            values_by_sensor=values_by_sensor,
+            sensor_params=candidate_params,
+            sensor_costs=sensor_costs,
+            budget=float(budget),
+            config=detector_config,
+        )
 
         detected_utc = (
             pd.Timestamp(result.detected_time).tz_convert("UTC")
@@ -369,9 +353,7 @@ def run_experiment(regime: str,
             tolerance_minutes,
         )
 
-        used_sensors = [
-            sid for sid, b in result.baselines.items() if b.get("used")
-        ]
+        sel_sum = result.selection_summary or {}
         per_day_entry = {
             "date": rec["date"],
             "true_change_point_utc": sunrise_utc.isoformat(),
@@ -387,53 +369,86 @@ def run_experiment(regime: str,
             "status": status,
             "false_alarm": false_alarm,
             "missed_detection": missed,
-            "active_sensors": list(selected_sensors),
-            "used_sensors": used_sensors,
+            "candidate_sensors": list(sel_sum.get("candidate_sensors")
+                                      or candidate_sensors),
+            "sensors_ever_selected": list(
+                sel_sum.get("sensors_ever_selected") or []),
+            "sensor_selection_counts": dict(
+                sel_sum.get("sensor_selection_counts") or {}),
+            "average_active_sensors_per_timestamp": sel_sum.get(
+                "average_active_sensors_per_timestamp"),
+            "average_budget_used": sel_sum.get("average_budget_used"),
+            "timestamps_without_selection": sel_sum.get(
+                "timestamps_without_selection"),
+            "evaluated_timestamps": sel_sum.get("evaluated_timestamps"),
             "grid_points": int(result.n_observations),
             "statistic_at_detection": result.statistic_at_detection,
             "notes": result.notes,
         }
-        if detector_mode == "global_gaussian_llr":
-            per_day_entry["sensor_parameters_used"] = result.baselines
-        else:
-            per_day_entry["baselines"] = result.baselines
         per_day.append(per_day_entry)
 
-
     aggregate = _aggregate_metrics(per_day)
+
+    # Cross-day selection frequency summary.
+    union_counts: dict[str, int] = {sid: 0 for sid in candidate_sensors}
+    for p in per_day:
+        for sid, c in (p.get("sensor_selection_counts") or {}).items():
+            union_counts[sid] = union_counts.get(sid, 0) + int(c)
+    sensors_ever_selected = sorted(
+        sid for sid, c in union_counts.items() if c > 0
+    )
+    most_frequent = sorted(
+        union_counts.items(), key=lambda kv: kv[1], reverse=True
+    )
+
     payload = {
         "scenario_name": f"{regime}_budget",
         "budget_regime": regime,
         "budget_description": _REGIME_DESCRIPTIONS[regime],
+        "budget_value": float(budget),
+        "budget_constraint": "sum_{i in S(t)} (C_i + T_i) <= B",
+        "cost_model": "unit_cost_assumption",
+        "unit_cost_assumption": policy_config.unit_cost_assumption,
+        "dynamic_selection": True,
         "selection_policy": (
-            "Rank candidate sensors by D_i (Gaussian divergence at sunrise) "
-            "and pick the top entries allowed by the budget. Costs C_i and "
-            "T_i are not available, so unit cost is assumed; this is "
-            "equivalent to ranking by D_i / (C_i + T_i) with C_i + T_i = 1."
+            "Dynamic information-per-cost selection. At each timestamp t, "
+            "the policy ranks the available sensors by D_i / (C_i + T_i) "
+            "and greedily selects S(t) under the budget constraint."
         ),
-        "all_valid_sensors": list(valid_sensors),
-        "selected_sensors": list(selected_sensors),
-        "selection_reason": selection.selection_reason,
-        "sensor_ranking": selection.ranking_used,
-        "unit_cost_assumption": selection.unit_cost_assumption,
-        "k": selection.k,
+        "selection_policy_config": policy_config.to_dict(),
+        "full_candidate_sensors": list(candidate_sensors),
+        "sensor_ranking": sensor_ranking,
+        "sensor_costs": [sensor_costs[sid].to_dict()
+                         for sid in candidate_sensors],
+        "selected_sensors_summary": {
+            "sensors_ever_selected": sensors_ever_selected,
+            "most_frequently_selected_sensors": [
+                {"sensor_id": sid, "selection_count": int(c)}
+                for sid, c in most_frequent if c > 0
+            ],
+        },
         "detector_input_mode": "multi_sensor",
         "detector_mode": detector_mode,
-        "detector_name": detector_name,
-        "aggregation": aggregation_name,
-        "detector_aggregation": aggregation_name,
-        "evidence_type": evidence_type,
-        "parameter_source": parameter_source,
-        "global_parameter_file": (
-            str(paths.SENSOR_INFORMATIVENESS_JSON.relative_to(paths.ROOT_DIR))
-            if detector_mode == "global_gaussian_llr" else None
-        ),
-        "global_sensor_parameters_used": (
-            {sid: sensor_params[sid] for sid in sensor_params}
-            if detector_mode == "global_gaussian_llr" else None
-        ),
+        "detector_name": detector_config.name,
+        "aggregation": detector_config.aggregation,
+        "evidence_type": detector_config.evidence_type,
+        "parameter_source": "global_empirical_sensor_parameters",
+        "global_parameter_file": str(
+            paths.SENSOR_INFORMATIVENESS_JSON.relative_to(paths.ROOT_DIR)),
         "detector_aggregation_description": aggregation_description,
-        "detector_parameters": detector_parameters,
+        "detector_parameters": {
+            "evidence_type": detector_config.evidence_type,
+            "selection_policy": detector_config.selection_policy,
+            "formula": (
+                "S(t) = greedy_select_by(D_i/(C_i+T_i)) "
+                "subject to sum (C_i+T_i) <= B; "
+                "llr_{i,t} = ((x_{i,t}-mu_{0,i})^2 - "
+                "(x_{i,t}-mu_{1,i})^2) / (2 sigma_i^2); "
+                "L_t = mean_{i in S(t)} llr_{i,t}; "
+                "S_t = max(0, S_{t-1} + L_t); "
+                "detect when S_t >= h."
+            ),
+        },
         "threshold": threshold,
         "tolerance_minutes": tolerance_minutes,
         "analysis_window": {
@@ -463,7 +478,7 @@ def write_results(payload: dict, out_path: Path | None = None) -> Path:
     return out_path
 
 
-# Backwards-compatible thin wrapper used by older imports / tests.
+# Backwards-compatible thin wrappers used by older imports / tests.
 def run_low_budget(**kwargs) -> dict:
     """Run the unified experiment with the low-budget regime."""
     kwargs.pop("sensor_id", None)  # silently ignore: chosen by policy now
