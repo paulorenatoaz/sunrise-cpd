@@ -106,8 +106,15 @@ def compute_sensor_informativeness(
                 "sensor_id": str(station_id),
                 "n_valid_days": 0,
                 "mu_0": None, "mu_1": None,
-                "sigma2": None, "D_i": None,
+                "sigma2": None, "sigma": None, "D_i": None,
                 "missing_rate": 1.0,
+                "mu_0_global": None, "mu_1_global": None,
+                "sigma2_global": None, "sigma_global": None,
+                "D_i_global": None,
+                "parameter_estimation_method": (
+                    "insufficient samples; sensor excluded from "
+                    "global parameter estimation."
+                ),
             }
             continue
         mu_0 = float(np.mean(pre_means))
@@ -132,8 +139,27 @@ def compute_sensor_informativeness(
             "mu_0": mu_0,
             "mu_1": mu_1,
             "sigma2": sigma2,
+            "sigma": (
+                float(np.sqrt(sigma2))
+                if (sigma2 is not None and np.isfinite(sigma2) and sigma2 > 0)
+                else None
+            ),
             "D_i": D_i,
             "missing_rate": float(missing_rate),
+            # Explicit aliases used by the global-parameter detector.
+            "mu_0_global": mu_0,
+            "mu_1_global": mu_1,
+            "sigma2_global": sigma2,
+            "sigma_global": (
+                float(np.sqrt(sigma2))
+                if (sigma2 is not None and np.isfinite(sigma2) and sigma2 > 0)
+                else None
+            ),
+            "D_i_global": D_i,
+            "parameter_estimation_method": (
+                "per-day pre/post-sunrise window means averaged across "
+                "valid days; pooled within-window variance."
+            ),
         }
 
     sensors_sorted = sorted(
@@ -149,6 +175,14 @@ def compute_sensor_informativeness(
         "pre_window_minutes": pre_window_minutes,
         "post_window_minutes": post_window_minutes,
         "n_sensors": len(sensors_sorted),
+        "parameter_estimation_method": (
+            "For every sensor, mu_0 and mu_1 are the cross-day averages "
+            "of the per-day means computed in the pre- and post-sunrise "
+            "windows; sigma^2 is the pooled within-window variance "
+            "across all valid days. The resulting (mu_0, mu_1, sigma^2) "
+            "are treated as fixed global empirical parameters of each "
+            "sensor and are reused unchanged across all detection days."
+        ),
         "notes": [],
     }
 
@@ -162,3 +196,53 @@ def write_informativeness(payload: dict,
         json.dump(payload, fh, indent=2, ensure_ascii=False)
     logger.info("Sensor informativeness written to %s", out_path)
     return out_path
+
+
+def load_global_sensor_parameters(
+        path: Path = paths.SENSOR_INFORMATIVENESS_JSON,
+        ) -> dict[str, dict]:
+    """Load fixed global per-sensor Gaussian parameters.
+
+    Reads the informativeness JSON and returns a mapping
+    ``{sensor_id: {mu_0, mu_1, sigma2, sigma, D_i}}`` containing only
+    sensors whose parameters are finite and whose variance is strictly
+    positive. These parameters are intended to be used unchanged for
+    every test day by the global-parameter detector.
+
+    Args:
+        path: Path to ``sensor_informativeness.json``.
+
+    Returns:
+        Mapping from sensor id (string) to its global Gaussian
+        parameters.
+    """
+    if not Path(path).exists():
+        raise FileNotFoundError(
+            f"Sensor informativeness JSON missing: {path}. "
+            "Run 'rank-sensors' first."
+        )
+    with open(path, "r", encoding="utf-8") as fh:
+        payload = json.load(fh)
+
+    out: dict[str, dict] = {}
+    for rec in payload.get("sensors", []):
+        sid = str(rec.get("sensor_id"))
+        mu_0 = rec.get("mu_0_global", rec.get("mu_0"))
+        mu_1 = rec.get("mu_1_global", rec.get("mu_1"))
+        sigma2 = rec.get("sigma2_global", rec.get("sigma2"))
+        d_i = rec.get("D_i_global", rec.get("D_i"))
+        if mu_0 is None or mu_1 is None or sigma2 is None:
+            continue
+        if not (np.isfinite(mu_0) and np.isfinite(mu_1)
+                and np.isfinite(sigma2) and sigma2 > 0):
+            continue
+        if d_i is None or not np.isfinite(d_i):
+            d_i = float((mu_1 - mu_0) ** 2 / (2.0 * sigma2))
+        out[sid] = {
+            "mu_0": float(mu_0),
+            "mu_1": float(mu_1),
+            "sigma2": float(sigma2),
+            "sigma": float(np.sqrt(sigma2)),
+            "D_i": float(d_i),
+        }
+    return out

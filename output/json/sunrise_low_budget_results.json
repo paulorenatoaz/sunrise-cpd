@@ -77,15 +77,26 @@
   "unit_cost_assumption": true,
   "k": 3,
   "detector_input_mode": "multi_sensor",
-  "detector_name": "one_sided_page_cusum_multi_sensor",
-  "aggregation": "mean_z",
-  "detector_aggregation": "mean_z",
-  "detector_aggregation_description": "At each timestamp, compute the per-sensor standardized evidence z_{i,t} = (x_{i,t} - mu_{0,i}) / sigma_{0,i} for each active sensor with a usable baseline, then average over the active sensors that report a finite reading. Apply the one-sided Page CUSUM to this aggregated evidence.",
+  "detector_mode": "global_gaussian_llr",
+  "detector_name": "global_gaussian_llr_cusum_multi_sensor",
+  "aggregation": "mean_llr",
+  "detector_aggregation": "mean_llr",
+  "evidence_type": "gaussian_log_likelihood_ratio",
+  "parameter_source": "global_empirical_sensor_parameters",
+  "global_parameter_file": "output/json/sensor_informativeness.json",
+  "global_sensor_parameters_used": {
+    "5": {
+      "mu_0": 1.1199025450300053,
+      "mu_1": 23.656973022832133,
+      "sigma2": 244.86254981827784,
+      "sigma": 15.648084541511073,
+      "D_i": 1.0371523658852024
+    }
+  },
+  "detector_aggregation_description": "At each timestamp, compute the per-sensor Gaussian log-likelihood ratio llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2) using fixed global empirical parameters, then average across active sensors with finite readings. Apply the one-sided CUSUM S_t = max(0, S_{t-1} + L_t) and detect when S_t >= h.",
   "detector_parameters": {
-    "drift_k": 0.5,
-    "min_baseline_samples": 5,
-    "fallback_sigma": 1.0,
-    "formula": "z_{i,t} = (x_{i,t} - mu_{0,i})/sigma_{0,i}; Z_t = mean_{i in S_t} z_{i,t}; S_t = max(0, S_{t-1} + Z_t - k); detect when S_t >= h."
+    "evidence_type": "gaussian_log_likelihood_ratio",
+    "formula": "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2); L_t = mean_{i in S_t} llr_{i,t}; S_t = max(0, S_{t-1} + L_t); detect when S_t >= h."
   },
   "threshold": 5.0,
   "tolerance_minutes": 15,
@@ -95,21 +106,21 @@
     "sync_freq": "2min"
   },
   "number_of_days": 43,
-  "number_of_detected_days": 36,
-  "number_of_missed_detections": 7,
-  "number_of_false_alarms": 7,
+  "number_of_detected_days": 34,
+  "number_of_missed_detections": 9,
+  "number_of_false_alarms": 0,
   "aggregate_metrics": {
     "valid_days_count": 43,
-    "detected_days_count": 36,
-    "missed_detection_count": 7,
-    "false_alarm_count": 7,
-    "mean_signed_delay_minutes": -8.112262936574076,
-    "median_signed_delay_minutes": -0.661427475,
-    "mean_absolute_error_minutes": 12.848523924537039,
-    "median_absolute_error_minutes": 3.6794685833333336,
-    "std_signed_delay_minutes": 23.459467639517815,
-    "min_signed_delay_minutes": -99.60155126666668,
-    "max_signed_delay_minutes": 17.02833975
+    "detected_days_count": 34,
+    "missed_detection_count": 9,
+    "false_alarm_count": 0,
+    "mean_signed_delay_minutes": 66.57920029754901,
+    "median_signed_delay_minutes": 63.560623633333336,
+    "mean_absolute_error_minutes": 66.57920029754901,
+    "median_absolute_error_minutes": 63.560623633333336,
+    "std_signed_delay_minutes": 29.146616828408344,
+    "min_signed_delay_minutes": 26.388706483333333,
+    "max_signed_delay_minutes": 115.34550365
   },
   "per_day_results": [
     {
@@ -128,11 +139,11 @@
       ],
       "used_sensors": [],
       "grid_points": 0,
-      "baselines": {},
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ]
+      ],
+      "sensor_parameters_used": {}
     },
     {
       "date": "2007-09-14",
@@ -150,11 +161,11 @@
       ],
       "used_sensors": [],
       "grid_points": 0,
-      "baselines": {},
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ]
+      ],
+      "sensor_parameters_used": {}
     },
     {
       "date": "2007-09-15",
@@ -172,11 +183,11 @@
       ],
       "used_sensors": [],
       "grid_points": 0,
-      "baselines": {},
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ]
+      ],
+      "sensor_parameters_used": {}
     },
     {
       "date": "2007-09-16",
@@ -194,11 +205,11 @@
       ],
       "used_sensors": [],
       "grid_points": 0,
-      "baselines": {},
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ]
+      ],
+      "sensor_parameters_used": {}
     },
     {
       "date": "2007-09-17",
@@ -216,11 +227,11 @@
       ],
       "used_sensors": [],
       "grid_points": 0,
-      "baselines": {},
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ]
+      ],
+      "sensor_parameters_used": {}
     },
     {
       "date": "2007-09-18",
@@ -238,11 +249,11 @@
       ],
       "used_sensors": [],
       "grid_points": 0,
-      "baselines": {},
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ]
+      ],
+      "sensor_parameters_used": {}
     },
     {
       "date": "2007-09-19",
@@ -260,1035 +271,20 @@
       ],
       "used_sensors": [],
       "grid_points": 0,
-      "baselines": {},
       "statistic_at_detection": null,
       "notes": [
         "No observations in window."
-      ]
+      ],
+      "sensor_parameters_used": {}
     },
     {
       "date": "2007-09-20",
       "true_change_point_utc": "2007-09-20T05:15:20.517481+00:00",
       "true_change_point_local": "2007-09-20T07:15:20.517481+02:00",
-      "detected_change_point_utc": "2007-09-20T05:16:42+00:00",
-      "detected_change_point_local": "2007-09-20T07:16:42+02:00",
-      "signed_delay_minutes": 1.3580419833333333,
-      "absolute_error_minutes": 1.3580419833333333,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.178583333333333,
-          "sigma": 1.5908714091325797,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.020515976162371,
-      "notes": []
-    },
-    {
-      "date": "2007-09-21",
-      "true_change_point_utc": "2007-09-21T05:16:35.483256+00:00",
-      "true_change_point_local": "2007-09-21T07:16:35.483256+02:00",
-      "detected_change_point_utc": "2007-09-21T05:20:37+00:00",
-      "detected_change_point_local": "2007-09-21T07:20:37+02:00",
-      "signed_delay_minutes": 4.025279066666666,
-      "absolute_error_minutes": 4.025279066666666,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.2849,
-          "sigma": 1.4264161883450712,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.387874519204198,
-      "notes": []
-    },
-    {
-      "date": "2007-09-22",
-      "true_change_point_utc": "2007-09-22T05:17:50.565738+00:00",
-      "true_change_point_local": "2007-09-22T07:17:50.565738+02:00",
-      "detected_change_point_utc": "2007-09-22T05:18:33+00:00",
-      "detected_change_point_local": "2007-09-22T07:18:33+02:00",
-      "signed_delay_minutes": 0.7072377,
-      "absolute_error_minutes": 0.7072377,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.0367833333333332,
-          "sigma": 1.1307158238451362,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.552746160856129,
-      "notes": []
-    },
-    {
-      "date": "2007-09-23",
-      "true_change_point_utc": "2007-09-23T05:19:05.775271+00:00",
-      "true_change_point_local": "2007-09-23T07:19:05.775271+02:00",
-      "detected_change_point_utc": "2007-09-23T05:18:28+00:00",
-      "detected_change_point_local": "2007-09-23T07:18:28+02:00",
-      "signed_delay_minutes": -0.62958785,
-      "absolute_error_minutes": 0.62958785,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.9393499999999998,
-          "sigma": 1.0739942370359539,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.33078169080396,
-      "notes": []
-    },
-    {
-      "date": "2007-09-24",
-      "true_change_point_utc": "2007-09-24T05:20:21.122283+00:00",
-      "true_change_point_local": "2007-09-24T07:20:21.122283+02:00",
-      "detected_change_point_utc": "2007-09-24T05:18:24+00:00",
-      "detected_change_point_local": "2007-09-24T07:18:24+02:00",
-      "signed_delay_minutes": -1.9520380499999999,
-      "absolute_error_minutes": 1.9520380499999999,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.9481833333333332,
-          "sigma": 1.0683186931931823,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.685863852090945,
-      "notes": []
-    },
-    {
-      "date": "2007-09-25",
-      "true_change_point_utc": "2007-09-25T05:21:36.617257+00:00",
-      "true_change_point_local": "2007-09-25T07:21:36.617257+02:00",
-      "detected_change_point_utc": "2007-09-25T04:40:37+00:00",
-      "detected_change_point_local": "2007-09-25T06:40:37+02:00",
-      "signed_delay_minutes": -40.99362095,
-      "absolute_error_minutes": 40.99362095,
-      "status": "false_alarm",
-      "false_alarm": true,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.8950166666666668,
-          "sigma": 1.228479913560901,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.129317454387178,
-      "notes": []
-    },
-    {
-      "date": "2007-09-26",
-      "true_change_point_utc": "2007-09-26T05:22:52.270695+00:00",
-      "true_change_point_local": "2007-09-26T07:22:52.270695+02:00",
-      "detected_change_point_utc": "2007-09-26T05:34:36+00:00",
-      "detected_change_point_local": "2007-09-26T07:34:36+02:00",
-      "signed_delay_minutes": 11.72882175,
-      "absolute_error_minutes": 11.72882175,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.2671999999999999,
-          "sigma": 1.9161294036482566,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.293314987791528,
-      "notes": []
-    },
-    {
-      "date": "2007-09-27",
-      "true_change_point_utc": "2007-09-27T05:24:08.093076+00:00",
-      "true_change_point_local": "2007-09-27T07:24:08.093076+02:00",
-      "detected_change_point_utc": "2007-09-27T03:44:32+00:00",
-      "detected_change_point_local": "2007-09-27T05:44:32+02:00",
-      "signed_delay_minutes": -99.60155126666668,
-      "absolute_error_minutes": 99.60155126666668,
-      "status": "false_alarm",
-      "false_alarm": true,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.2051833333333335,
-          "sigma": 1.7861073713778786,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.390787875494631,
-      "notes": []
-    },
-    {
-      "date": "2007-09-28",
-      "true_change_point_utc": "2007-09-28T05:25:24.094824+00:00",
-      "true_change_point_local": "2007-09-28T07:25:24.094824+02:00",
-      "detected_change_point_utc": "2007-09-28T05:32:28+00:00",
-      "detected_change_point_local": "2007-09-28T07:32:28+02:00",
-      "signed_delay_minutes": 7.0650862666666665,
-      "absolute_error_minutes": 7.0650862666666665,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.0811666666666666,
-          "sigma": 1.6983479826161945,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.227782239641764,
-      "notes": []
-    },
-    {
-      "date": "2007-09-29",
-      "true_change_point_utc": "2007-09-29T05:26:40.286271+00:00",
-      "true_change_point_local": "2007-09-29T07:26:40.286271+02:00",
-      "detected_change_point_utc": "2007-09-29T04:44:24+00:00",
-      "detected_change_point_local": "2007-09-29T06:44:24+02:00",
-      "signed_delay_minutes": -42.27143785,
-      "absolute_error_minutes": 42.27143785,
-      "status": "false_alarm",
-      "false_alarm": true,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.2140666666666664,
-          "sigma": 1.9211273602922,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.06434008176076,
-      "notes": []
-    },
-    {
-      "date": "2007-09-30",
-      "true_change_point_utc": "2007-09-30T05:27:56.677611+00:00",
-      "true_change_point_local": "2007-09-30T07:27:56.677611+02:00",
-      "detected_change_point_utc": "2007-09-30T05:30:20+00:00",
-      "detected_change_point_local": "2007-09-30T07:30:20+02:00",
-      "signed_delay_minutes": 2.388706483333333,
-      "absolute_error_minutes": 2.388706483333333,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 119,
-      "baselines": {
-        "5": {
-          "mu": 1.3115999999999999,
-          "sigma": 1.9443693692474682,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.886266651747827,
-      "notes": []
-    },
-    {
-      "date": "2007-10-01",
-      "true_change_point_utc": "2007-10-01T05:29:13.278867+00:00",
-      "true_change_point_local": "2007-10-01T07:29:13.278867+02:00",
-      "detected_change_point_utc": "2007-10-01T05:28:32+00:00",
-      "detected_change_point_local": "2007-10-01T07:28:32+02:00",
-      "signed_delay_minutes": -0.6879811166666666,
-      "absolute_error_minutes": 0.6879811166666666,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.0545666666666664,
-          "sigma": 0.9862528703602262,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.171373157619314,
-      "notes": []
-    },
-    {
-      "date": "2007-10-02",
-      "true_change_point_utc": "2007-10-02T05:30:30.099847+00:00",
-      "true_change_point_local": "2007-10-02T07:30:30.099847+02:00",
-      "detected_change_point_utc": "2007-10-02T04:32:27+00:00",
-      "detected_change_point_local": "2007-10-02T06:32:27+02:00",
-      "signed_delay_minutes": -58.051664116666664,
-      "absolute_error_minutes": 58.051664116666664,
-      "status": "false_alarm",
-      "false_alarm": true,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.3115166666666667,
-          "sigma": 1.747072122070956,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.040884676673777,
-      "notes": []
-    },
-    {
-      "date": "2007-10-03",
-      "true_change_point_utc": "2007-10-03T05:31:47.150105+00:00",
-      "true_change_point_local": "2007-10-03T07:31:47.150105+02:00",
-      "detected_change_point_utc": "2007-10-03T05:24:27+00:00",
-      "detected_change_point_local": "2007-10-03T07:24:27+02:00",
-      "signed_delay_minutes": -7.3358350833333335,
-      "absolute_error_minutes": 7.3358350833333335,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.2672166666666667,
-          "sigma": 1.781245518261782,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.198832324689688,
-      "notes": []
-    },
-    {
-      "date": "2007-10-04",
-      "true_change_point_utc": "2007-10-04T05:33:04.438893+00:00",
-      "true_change_point_local": "2007-10-04T07:33:04.438893+02:00",
-      "detected_change_point_utc": "2007-10-04T05:36:28+00:00",
-      "detected_change_point_local": "2007-10-04T07:36:28+02:00",
-      "signed_delay_minutes": 3.3926851166666667,
-      "absolute_error_minutes": 3.3926851166666667,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.7443499999999997,
-          "sigma": 0.9035876670439333,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.001963282369938,
-      "notes": []
-    },
-    {
-      "date": "2007-10-05",
-      "true_change_point_utc": "2007-10-05T05:34:21.975123+00:00",
-      "true_change_point_local": "2007-10-05T07:34:21.975123+02:00",
-      "detected_change_point_utc": "2007-10-05T05:30:24+00:00",
-      "detected_change_point_local": "2007-10-05T07:30:24+02:00",
-      "signed_delay_minutes": -3.96625205,
-      "absolute_error_minutes": 3.96625205,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.2051833333333335,
-          "sigma": 1.7834145548059726,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.676947708403822,
-      "notes": []
-    },
-    {
-      "date": "2007-10-06",
-      "true_change_point_utc": "2007-10-06T05:35:39.767316+00:00",
-      "true_change_point_local": "2007-10-06T07:35:39.767316+02:00",
-      "detected_change_point_utc": "2007-10-06T05:50:24+00:00",
-      "detected_change_point_local": "2007-10-06T07:50:24+02:00",
-      "signed_delay_minutes": 14.7372114,
-      "absolute_error_minutes": 14.7372114,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.8949999999999998,
-          "sigma": 1.0655705402605622,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.560004274318527,
-      "notes": []
-    },
-    {
-      "date": "2007-10-07",
-      "true_change_point_utc": "2007-10-07T05:36:57.823564+00:00",
-      "true_change_point_local": "2007-10-07T07:36:57.823564+02:00",
-      "detected_change_point_utc": "2007-10-07T05:34:24+00:00",
-      "detected_change_point_local": "2007-10-07T07:34:24+02:00",
-      "signed_delay_minutes": -2.563726066666667,
-      "absolute_error_minutes": 2.563726066666667,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.9216,
-          "sigma": 0.9382903710147426,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.928115114746564,
-      "notes": []
-    },
-    {
-      "date": "2007-10-08",
-      "true_change_point_utc": "2007-10-08T05:38:16.151474+00:00",
-      "true_change_point_local": "2007-10-08T07:38:16.151474+02:00",
-      "detected_change_point_utc": "2007-10-08T05:36:21+00:00",
-      "detected_change_point_local": "2007-10-08T07:36:21+02:00",
-      "signed_delay_minutes": -1.9191912333333332,
-      "absolute_error_minutes": 1.9191912333333332,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.1697333333333333,
-          "sigma": 1.3593449552430144,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.293013942624552,
-      "notes": []
-    },
-    {
-      "date": "2007-10-09",
-      "true_change_point_utc": "2007-10-09T05:39:34.758125+00:00",
-      "true_change_point_local": "2007-10-09T07:39:34.758125+02:00",
-      "detected_change_point_utc": "2007-10-09T05:40:16+00:00",
-      "detected_change_point_local": "2007-10-09T07:40:16+02:00",
-      "signed_delay_minutes": 0.6873645833333334,
-      "absolute_error_minutes": 0.6873645833333334,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.3115333333333334,
-          "sigma": 1.416816274187398,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.255651550258761,
-      "notes": []
-    },
-    {
-      "date": "2007-10-10",
-      "true_change_point_utc": "2007-10-10T05:40:53.650020+00:00",
-      "true_change_point_local": "2007-10-10T07:40:53.650020+02:00",
-      "detected_change_point_utc": "2007-10-10T05:40:12+00:00",
-      "detected_change_point_local": "2007-10-10T07:40:12+02:00",
-      "signed_delay_minutes": -0.694167,
-      "absolute_error_minutes": 0.694167,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.0634333333333332,
-          "sigma": 1.3599842891249394,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.537360708157972,
-      "notes": []
-    },
-    {
-      "date": "2007-10-11",
-      "true_change_point_utc": "2007-10-11T05:42:12.833029+00:00",
-      "true_change_point_local": "2007-10-11T07:42:12.833029+02:00",
-      "detected_change_point_utc": "2007-10-11T05:40:22+00:00",
-      "detected_change_point_local": "2007-10-11T07:40:22+02:00",
-      "signed_delay_minutes": -1.8472171499999999,
-      "absolute_error_minutes": 1.8472171499999999,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.9038999999999999,
-          "sigma": 1.1678368196319788,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.013464083762244,
-      "notes": []
-    },
-    {
-      "date": "2007-10-12",
-      "true_change_point_utc": "2007-10-12T05:43:32.312346+00:00",
-      "true_change_point_local": "2007-10-12T07:43:32.312346+02:00",
-      "detected_change_point_utc": "2007-10-12T05:44:17+00:00",
-      "detected_change_point_local": "2007-10-12T07:44:17+02:00",
-      "signed_delay_minutes": 0.7447942333333334,
-      "absolute_error_minutes": 0.7447942333333334,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.5862500000000002,
-          "sigma": 2.4247787222125887,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.677584096658306,
-      "notes": []
-    },
-    {
-      "date": "2007-10-13",
-      "true_change_point_utc": "2007-10-13T05:44:52.092430+00:00",
-      "true_change_point_local": "2007-10-13T07:44:52.092430+02:00",
-      "detected_change_point_utc": "2007-10-13T05:44:14+00:00",
-      "detected_change_point_local": "2007-10-13T07:44:14+02:00",
-      "signed_delay_minutes": -0.6348738333333334,
-      "absolute_error_minutes": 0.6348738333333334,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 121,
-      "baselines": {
-        "5": {
-          "mu": 1.1070491803278686,
-          "sigma": 1.2019622765326914,
-          "n_pre_finite": 61,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.885174259921035,
-      "notes": []
-    },
-    {
-      "date": "2007-10-14",
-      "true_change_point_utc": "2007-10-14T05:46:12.176956+00:00",
-      "true_change_point_local": "2007-10-14T07:46:12.176956+02:00",
-      "detected_change_point_utc": "2007-10-14T05:48:10+00:00",
-      "detected_change_point_local": "2007-10-14T07:48:10+02:00",
-      "signed_delay_minutes": 1.9637174,
-      "absolute_error_minutes": 1.9637174,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.5950833333333336,
-          "sigma": 1.9308368370328284,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.312974944488978,
-      "notes": []
-    },
-    {
-      "date": "2007-10-15",
-      "true_change_point_utc": "2007-10-15T05:47:32.568759+00:00",
-      "true_change_point_local": "2007-10-15T07:47:32.568759+02:00",
-      "detected_change_point_utc": "2007-10-15T05:50:04+00:00",
-      "detected_change_point_local": "2007-10-15T07:50:04+02:00",
-      "signed_delay_minutes": 2.5238540166666668,
-      "absolute_error_minutes": 2.5238540166666668,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.3912833333333332,
-          "sigma": 2.3659271095815924,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.122628465727628,
-      "notes": []
-    },
-    {
-      "date": "2007-10-16",
-      "true_change_point_utc": "2007-10-16T05:48:53.269781+00:00",
-      "true_change_point_local": "2007-10-16T07:48:53.269781+02:00",
-      "detected_change_point_utc": "2007-10-16T05:42:14+00:00",
-      "detected_change_point_local": "2007-10-16T07:42:14+02:00",
-      "signed_delay_minutes": -6.6544963500000005,
-      "absolute_error_minutes": 6.6544963500000005,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 121,
-      "baselines": {
-        "5": {
-          "mu": 0.9304833333333332,
-          "sigma": 0.9622142453501726,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.202445122935495,
-      "notes": []
-    },
-    {
-      "date": "2007-10-17",
-      "true_change_point_utc": "2007-10-17T05:50:14.281012+00:00",
-      "true_change_point_local": "2007-10-17T07:50:14.281012+02:00",
-      "detected_change_point_utc": "2007-10-17T05:42:09+00:00",
-      "detected_change_point_local": "2007-10-17T07:42:09+02:00",
-      "signed_delay_minutes": -8.088016866666667,
-      "absolute_error_minutes": 8.088016866666667,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 100,
-      "baselines": {
-        "5": {
-          "mu": 1.0634615384615387,
-          "sigma": 1.3023921198263684,
-          "n_pre_finite": 52,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 6.390590270817418,
-      "notes": []
-    },
-    {
-      "date": "2007-10-18",
-      "true_change_point_utc": "2007-10-18T05:51:35.602438+00:00",
-      "true_change_point_local": "2007-10-18T07:51:35.602438+02:00",
-      "detected_change_point_utc": "2007-10-18T05:32:06+00:00",
-      "detected_change_point_local": "2007-10-18T07:32:06+02:00",
-      "signed_delay_minutes": -19.493373966666663,
-      "absolute_error_minutes": 19.493373966666663,
-      "status": "false_alarm",
-      "false_alarm": true,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 122,
-      "baselines": {
-        "5": {
-          "mu": 0.8232903225806448,
-          "sigma": 1.2540774205072522,
-          "n_pre_finite": 62,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.550441906407533,
-      "notes": []
-    },
-    {
-      "date": "2007-10-19",
-      "true_change_point_utc": "2007-10-19T05:52:57.232986+00:00",
-      "true_change_point_local": "2007-10-19T07:52:57.232986+02:00",
-      "detected_change_point_utc": "2007-10-19T05:44:03+00:00",
-      "detected_change_point_local": "2007-10-19T07:44:03+02:00",
-      "signed_delay_minutes": -8.9038831,
-      "absolute_error_minutes": 8.9038831,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.7709666666666666,
-          "sigma": 1.3401802682521593,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.105156194057954,
-      "notes": []
-    },
-    {
-      "date": "2007-10-20",
-      "true_change_point_utc": "2007-10-20T05:54:19.170461+00:00",
-      "true_change_point_local": "2007-10-20T07:54:19.170461+02:00",
-      "detected_change_point_utc": "2007-10-20T06:06:15+00:00",
-      "detected_change_point_local": "2007-10-20T08:06:15+02:00",
-      "signed_delay_minutes": 11.930492316666665,
-      "absolute_error_minutes": 11.930492316666665,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 123,
-      "baselines": {
-        "5": {
-          "mu": 0.895,
-          "sigma": 1.1644797776442375,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.5301952678965645,
-      "notes": []
-    },
-    {
-      "date": "2007-10-21",
-      "true_change_point_utc": "2007-10-21T05:55:41.411496+00:00",
-      "true_change_point_local": "2007-10-21T07:55:41.411496+02:00",
-      "detected_change_point_utc": "2007-10-21T05:00:13+00:00",
-      "detected_change_point_local": "2007-10-21T07:00:13+02:00",
-      "signed_delay_minutes": -55.47352493333334,
-      "absolute_error_minutes": 55.47352493333334,
-      "status": "false_alarm",
-      "false_alarm": true,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.4710333333333332,
-          "sigma": 1.9975592476876871,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.418205770542931,
-      "notes": []
-    },
-    {
-      "date": "2007-10-22",
-      "true_change_point_utc": "2007-10-22T05:57:03.951493+00:00",
-      "true_change_point_local": "2007-10-22T07:57:03.951493+02:00",
-      "detected_change_point_utc": "2007-10-22T06:00:11+00:00",
-      "detected_change_point_local": "2007-10-22T08:00:11+02:00",
-      "signed_delay_minutes": 3.1174751166666668,
-      "absolute_error_minutes": 3.1174751166666668,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 108,
-      "baselines": {
-        "5": {
-          "mu": 1.3176739130434783,
-          "sigma": 1.3853332700408685,
-          "n_pre_finite": 46,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.87725487266781,
-      "notes": []
-    },
-    {
-      "date": "2007-10-23",
-      "true_change_point_utc": "2007-10-23T05:58:26.784564+00:00",
-      "true_change_point_local": "2007-10-23T07:58:26.784564+02:00",
-      "detected_change_point_utc": "2007-10-23T06:00:18+00:00",
-      "detected_change_point_local": "2007-10-23T08:00:18+02:00",
-      "signed_delay_minutes": 1.8535906,
-      "absolute_error_minutes": 1.8535906,
-      "status": "on_time",
-      "false_alarm": false,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 1.0456999999999999,
-          "sigma": 1.541546640250562,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 5.836108466955816,
-      "notes": []
-    },
-    {
-      "date": "2007-10-24",
-      "true_change_point_utc": "2007-10-24T05:59:49.903480+00:00",
-      "true_change_point_local": "2007-10-24T07:59:49.903480+02:00",
-      "detected_change_point_utc": "2007-10-24T05:44:18+00:00",
-      "detected_change_point_local": "2007-10-24T07:44:18+02:00",
-      "signed_delay_minutes": -15.531724666666666,
-      "absolute_error_minutes": 15.531724666666666,
-      "status": "false_alarm",
-      "false_alarm": true,
-      "missed_detection": false,
-      "active_sensors": [
-        "5"
-      ],
-      "used_sensors": [
-        "5"
-      ],
-      "grid_points": 120,
-      "baselines": {
-        "5": {
-          "mu": 0.9570666666666666,
-          "sigma": 1.8672939440394294,
-          "n_pre_finite": 60,
-          "used": true
-        }
-      },
-      "statistic_at_detection": 8.795922449733185,
-      "notes": []
-    },
-    {
-      "date": "2007-10-25",
-      "true_change_point_utc": "2007-10-25T06:01:13.299615+00:00",
-      "true_change_point_local": "2007-10-25T08:01:13.299615+02:00",
-      "detected_change_point_utc": "2007-10-25T06:18:15+00:00",
-      "detected_change_point_local": "2007-10-25T08:18:15+02:00",
-      "signed_delay_minutes": 17.02833975,
-      "absolute_error_minutes": 17.02833975,
+      "detected_change_point_utc": "2007-09-20T06:50:41+00:00",
+      "detected_change_point_local": "2007-09-20T08:50:41+02:00",
+      "signed_delay_minutes": 95.34137531666667,
+      "absolute_error_minutes": 95.34137531666667,
       "status": "detected",
       "false_alarm": false,
       "missed_detection": false,
@@ -1299,17 +295,1068 @@
         "5"
       ],
       "grid_points": 120,
-      "baselines": {
+      "statistic_at_detection": 5.267165743159219,
+      "notes": [],
+      "sensor_parameters_used": {
         "5": {
-          "mu": 1.1520833333333331,
-          "sigma": 1.757221673519595,
-          "n_pre_finite": 60,
-          "used": true
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
         }
-      },
-      "statistic_at_detection": 5.747347805440635,
-      "notes": []
+      }
+    },
+    {
+      "date": "2007-09-21",
+      "true_change_point_utc": "2007-09-21T05:16:35.483256+00:00",
+      "true_change_point_local": "2007-09-21T07:16:35.483256+02:00",
+      "detected_change_point_utc": "2007-09-21T06:58:37+00:00",
+      "detected_change_point_local": "2007-09-21T08:58:37+02:00",
+      "signed_delay_minutes": 102.02527906666666,
+      "absolute_error_minutes": 102.02527906666666,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.370554725317639,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-22",
+      "true_change_point_utc": "2007-09-22T05:17:50.565738+00:00",
+      "true_change_point_local": "2007-09-22T07:17:50.565738+02:00",
+      "detected_change_point_utc": "2007-09-22T07:02:33+00:00",
+      "detected_change_point_local": "2007-09-22T09:02:33+02:00",
+      "signed_delay_minutes": 104.7072377,
+      "absolute_error_minutes": 104.7072377,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.2970324099225845,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-23",
+      "true_change_point_utc": "2007-09-23T05:19:05.775271+00:00",
+      "true_change_point_local": "2007-09-23T07:19:05.775271+02:00",
+      "detected_change_point_utc": "2007-09-23T06:04:28+00:00",
+      "detected_change_point_local": "2007-09-23T08:04:28+02:00",
+      "signed_delay_minutes": 45.37041215,
+      "absolute_error_minutes": 45.37041215,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 6.377342833648798,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-24",
+      "true_change_point_utc": "2007-09-24T05:20:21.122283+00:00",
+      "true_change_point_local": "2007-09-24T07:20:21.122283+02:00",
+      "detected_change_point_utc": "2007-09-24T06:28:24+00:00",
+      "detected_change_point_local": "2007-09-24T08:28:24+02:00",
+      "signed_delay_minutes": 68.04796195,
+      "absolute_error_minutes": 68.04796195,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 6.265623633353126,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-25",
+      "true_change_point_utc": "2007-09-25T05:21:36.617257+00:00",
+      "true_change_point_local": "2007-09-25T07:21:36.617257+02:00",
+      "detected_change_point_utc": "2007-09-25T06:44:36+00:00",
+      "detected_change_point_local": "2007-09-25T08:44:36+02:00",
+      "signed_delay_minutes": 82.98971238333334,
+      "absolute_error_minutes": 82.98971238333334,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.4183008314434105,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-26",
+      "true_change_point_utc": "2007-09-26T05:22:52.270695+00:00",
+      "true_change_point_local": "2007-09-26T07:22:52.270695+02:00",
+      "detected_change_point_utc": "2007-09-26T06:46:35+00:00",
+      "detected_change_point_local": "2007-09-26T08:46:35+02:00",
+      "signed_delay_minutes": 83.71215508333333,
+      "absolute_error_minutes": 83.71215508333333,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 6.357634889654538,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-27",
+      "true_change_point_utc": "2007-09-27T05:24:08.093076+00:00",
+      "true_change_point_local": "2007-09-27T07:24:08.093076+02:00",
+      "detected_change_point_utc": "2007-09-27T05:50:32+00:00",
+      "detected_change_point_local": "2007-09-27T07:50:32+02:00",
+      "signed_delay_minutes": 26.398448733333332,
+      "absolute_error_minutes": 26.398448733333332,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 6.274379273676383,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-28",
+      "true_change_point_utc": "2007-09-28T05:25:24.094824+00:00",
+      "true_change_point_local": "2007-09-28T07:25:24.094824+02:00",
+      "detected_change_point_utc": "2007-09-28T06:12:28+00:00",
+      "detected_change_point_local": "2007-09-28T08:12:28+02:00",
+      "signed_delay_minutes": 47.06508626666667,
+      "absolute_error_minutes": 47.06508626666667,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.163408602284906,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-29",
+      "true_change_point_utc": "2007-09-29T05:26:40.286271+00:00",
+      "true_change_point_local": "2007-09-29T07:26:40.286271+02:00",
+      "detected_change_point_utc": "2007-09-29T06:30:24+00:00",
+      "detected_change_point_local": "2007-09-29T08:30:24+02:00",
+      "signed_delay_minutes": 63.72856215,
+      "absolute_error_minutes": 63.72856215,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.501464407742592,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-09-30",
+      "true_change_point_utc": "2007-09-30T05:27:56.677611+00:00",
+      "true_change_point_local": "2007-09-30T07:27:56.677611+02:00",
+      "detected_change_point_utc": "2007-09-30T05:54:20+00:00",
+      "detected_change_point_local": "2007-09-30T07:54:20+02:00",
+      "signed_delay_minutes": 26.388706483333333,
+      "absolute_error_minutes": 26.388706483333333,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 119,
+      "statistic_at_detection": 7.008487753165603,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-01",
+      "true_change_point_utc": "2007-10-01T05:29:13.278867+00:00",
+      "true_change_point_local": "2007-10-01T07:29:13.278867+02:00",
+      "detected_change_point_utc": "2007-10-01T06:00:32+00:00",
+      "detected_change_point_local": "2007-10-01T08:00:32+02:00",
+      "signed_delay_minutes": 31.312018883333334,
+      "absolute_error_minutes": 31.312018883333334,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.5453961754112004,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-02",
+      "true_change_point_utc": "2007-10-02T05:30:30.099847+00:00",
+      "true_change_point_local": "2007-10-02T07:30:30.099847+02:00",
+      "detected_change_point_utc": "2007-10-02T06:52:27+00:00",
+      "detected_change_point_local": "2007-10-02T08:52:27+02:00",
+      "signed_delay_minutes": 81.94833588333333,
+      "absolute_error_minutes": 81.94833588333333,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.340780098233246,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-03",
+      "true_change_point_utc": "2007-10-03T05:31:47.150105+00:00",
+      "true_change_point_local": "2007-10-03T07:31:47.150105+02:00",
+      "detected_change_point_utc": "2007-10-03T05:58:27+00:00",
+      "detected_change_point_local": "2007-10-03T07:58:27+02:00",
+      "signed_delay_minutes": 26.664164916666667,
+      "absolute_error_minutes": 26.664164916666667,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.119568874295271,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-04",
+      "true_change_point_utc": "2007-10-04T05:33:04.438893+00:00",
+      "true_change_point_local": "2007-10-04T07:33:04.438893+02:00",
+      "detected_change_point_utc": "2007-10-04T06:36:28+00:00",
+      "detected_change_point_local": "2007-10-04T08:36:28+02:00",
+      "signed_delay_minutes": 63.39268511666667,
+      "absolute_error_minutes": 63.39268511666667,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.814778927660951,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-05",
+      "true_change_point_utc": "2007-10-05T05:34:21.975123+00:00",
+      "true_change_point_local": "2007-10-05T07:34:21.975123+02:00",
+      "detected_change_point_utc": "2007-10-05T06:10:24+00:00",
+      "detected_change_point_local": "2007-10-05T08:10:24+02:00",
+      "signed_delay_minutes": 36.03374795,
+      "absolute_error_minutes": 36.03374795,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.354753159459516,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-06",
+      "true_change_point_utc": "2007-10-06T05:35:39.767316+00:00",
+      "true_change_point_local": "2007-10-06T07:35:39.767316+02:00",
+      "detected_change_point_utc": "2007-10-06T06:56:23+00:00",
+      "detected_change_point_local": "2007-10-06T08:56:23+02:00",
+      "signed_delay_minutes": 80.72054473333333,
+      "absolute_error_minutes": 80.72054473333333,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.569527959406575,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-07",
+      "true_change_point_utc": "2007-10-07T05:36:57.823564+00:00",
+      "true_change_point_local": "2007-10-07T07:36:57.823564+02:00",
+      "detected_change_point_utc": null,
+      "detected_change_point_local": null,
+      "signed_delay_minutes": null,
+      "absolute_error_minutes": null,
+      "status": "missed_detection",
+      "false_alarm": false,
+      "missed_detection": true,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": null,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-08",
+      "true_change_point_utc": "2007-10-08T05:38:16.151474+00:00",
+      "true_change_point_local": "2007-10-08T07:38:16.151474+02:00",
+      "detected_change_point_utc": "2007-10-08T07:32:20+00:00",
+      "detected_change_point_local": "2007-10-08T09:32:20+02:00",
+      "signed_delay_minutes": 114.0641421,
+      "absolute_error_minutes": 114.0641421,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.614586690484113,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-09",
+      "true_change_point_utc": "2007-10-09T05:39:34.758125+00:00",
+      "true_change_point_local": "2007-10-09T07:39:34.758125+02:00",
+      "detected_change_point_utc": "2007-10-09T06:10:15+00:00",
+      "detected_change_point_local": "2007-10-09T08:10:15+02:00",
+      "signed_delay_minutes": 30.670697916666665,
+      "absolute_error_minutes": 30.670697916666665,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.329919834241216,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-10",
+      "true_change_point_utc": "2007-10-10T05:40:53.650020+00:00",
+      "true_change_point_local": "2007-10-10T07:40:53.650020+02:00",
+      "detected_change_point_utc": "2007-10-10T06:38:11+00:00",
+      "detected_change_point_local": "2007-10-10T08:38:11+02:00",
+      "signed_delay_minutes": 57.289166333333334,
+      "absolute_error_minutes": 57.289166333333334,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 6.181574436473073,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-11",
+      "true_change_point_utc": "2007-10-11T05:42:12.833029+00:00",
+      "true_change_point_local": "2007-10-11T07:42:12.833029+02:00",
+      "detected_change_point_utc": "2007-10-11T07:18:22+00:00",
+      "detected_change_point_local": "2007-10-11T09:18:22+02:00",
+      "signed_delay_minutes": 96.15278285,
+      "absolute_error_minutes": 96.15278285,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.1253037570632625,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-12",
+      "true_change_point_utc": "2007-10-12T05:43:32.312346+00:00",
+      "true_change_point_local": "2007-10-12T07:43:32.312346+02:00",
+      "detected_change_point_utc": "2007-10-12T06:42:19+00:00",
+      "detected_change_point_local": "2007-10-12T08:42:19+02:00",
+      "signed_delay_minutes": 58.77812756666666,
+      "absolute_error_minutes": 58.77812756666666,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.256730901353194,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-13",
+      "true_change_point_utc": "2007-10-13T05:44:52.092430+00:00",
+      "true_change_point_local": "2007-10-13T07:44:52.092430+02:00",
+      "detected_change_point_utc": "2007-10-13T06:22:13+00:00",
+      "detected_change_point_local": "2007-10-13T08:22:13+02:00",
+      "signed_delay_minutes": 37.3484595,
+      "absolute_error_minutes": 37.3484595,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 121,
+      "statistic_at_detection": 5.7607804769022115,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-14",
+      "true_change_point_utc": "2007-10-14T05:46:12.176956+00:00",
+      "true_change_point_local": "2007-10-14T07:46:12.176956+02:00",
+      "detected_change_point_utc": "2007-10-14T07:34:09+00:00",
+      "detected_change_point_local": "2007-10-14T09:34:09+02:00",
+      "signed_delay_minutes": 107.94705073333333,
+      "absolute_error_minutes": 107.94705073333333,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.1500450426025886,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-15",
+      "true_change_point_utc": "2007-10-15T05:47:32.568759+00:00",
+      "true_change_point_local": "2007-10-15T07:47:32.568759+02:00",
+      "detected_change_point_utc": "2007-10-15T07:34:18+00:00",
+      "detected_change_point_local": "2007-10-15T09:34:18+02:00",
+      "signed_delay_minutes": 106.75718735000001,
+      "absolute_error_minutes": 106.75718735000001,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.0575163244361985,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-16",
+      "true_change_point_utc": "2007-10-16T05:48:53.269781+00:00",
+      "true_change_point_local": "2007-10-16T07:48:53.269781+02:00",
+      "detected_change_point_utc": "2007-10-16T07:44:14+00:00",
+      "detected_change_point_local": "2007-10-16T09:44:14+02:00",
+      "signed_delay_minutes": 115.34550365,
+      "absolute_error_minutes": 115.34550365,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 121,
+      "statistic_at_detection": 5.424035714211401,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-17",
+      "true_change_point_utc": "2007-10-17T05:50:14.281012+00:00",
+      "true_change_point_local": "2007-10-17T07:50:14.281012+02:00",
+      "detected_change_point_utc": "2007-10-17T06:40:10+00:00",
+      "detected_change_point_local": "2007-10-17T08:40:10+02:00",
+      "signed_delay_minutes": 49.9286498,
+      "absolute_error_minutes": 49.9286498,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 100,
+      "statistic_at_detection": 5.408659570539284,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-18",
+      "true_change_point_utc": "2007-10-18T05:51:35.602438+00:00",
+      "true_change_point_local": "2007-10-18T07:51:35.602438+02:00",
+      "detected_change_point_utc": "2007-10-18T06:34:05+00:00",
+      "detected_change_point_local": "2007-10-18T08:34:05+02:00",
+      "signed_delay_minutes": 42.48995936666667,
+      "absolute_error_minutes": 42.48995936666667,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 122,
+      "statistic_at_detection": 5.202732450594453,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-19",
+      "true_change_point_utc": "2007-10-19T05:52:57.232986+00:00",
+      "true_change_point_local": "2007-10-19T07:52:57.232986+02:00",
+      "detected_change_point_utc": null,
+      "detected_change_point_local": null,
+      "signed_delay_minutes": null,
+      "absolute_error_minutes": null,
+      "status": "missed_detection",
+      "false_alarm": false,
+      "missed_detection": true,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": null,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-20",
+      "true_change_point_utc": "2007-10-20T05:54:19.170461+00:00",
+      "true_change_point_local": "2007-10-20T07:54:19.170461+02:00",
+      "detected_change_point_utc": "2007-10-20T06:58:16+00:00",
+      "detected_change_point_local": "2007-10-20T08:58:16+02:00",
+      "signed_delay_minutes": 63.94715898333333,
+      "absolute_error_minutes": 63.94715898333333,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 123,
+      "statistic_at_detection": 7.498564267488352,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-21",
+      "true_change_point_utc": "2007-10-21T05:55:41.411496+00:00",
+      "true_change_point_local": "2007-10-21T07:55:41.411496+02:00",
+      "detected_change_point_utc": "2007-10-21T06:28:13+00:00",
+      "detected_change_point_local": "2007-10-21T08:28:13+02:00",
+      "signed_delay_minutes": 32.52647506666667,
+      "absolute_error_minutes": 32.52647506666667,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.148733999835712,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-22",
+      "true_change_point_utc": "2007-10-22T05:57:03.951493+00:00",
+      "true_change_point_local": "2007-10-22T07:57:03.951493+02:00",
+      "detected_change_point_utc": "2007-10-22T07:12:19+00:00",
+      "detected_change_point_local": "2007-10-22T09:12:19+02:00",
+      "signed_delay_minutes": 75.25080845000001,
+      "absolute_error_minutes": 75.25080845000001,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 108,
+      "statistic_at_detection": 5.462140559433045,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-23",
+      "true_change_point_utc": "2007-10-23T05:58:26.784564+00:00",
+      "true_change_point_local": "2007-10-23T07:58:26.784564+02:00",
+      "detected_change_point_utc": "2007-10-23T06:40:17+00:00",
+      "detected_change_point_local": "2007-10-23T08:40:17+02:00",
+      "signed_delay_minutes": 41.83692393333333,
+      "absolute_error_minutes": 41.83692393333333,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.711907407367509,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-24",
+      "true_change_point_utc": "2007-10-24T05:59:49.903480+00:00",
+      "true_change_point_local": "2007-10-24T07:59:49.903480+02:00",
+      "detected_change_point_utc": "2007-10-24T07:48:18+00:00",
+      "detected_change_point_local": "2007-10-24T09:48:18+02:00",
+      "signed_delay_minutes": 108.46827533333334,
+      "absolute_error_minutes": 108.46827533333334,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.012883015544666,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
+    },
+    {
+      "date": "2007-10-25",
+      "true_change_point_utc": "2007-10-25T06:01:13.299615+00:00",
+      "true_change_point_local": "2007-10-25T08:01:13.299615+02:00",
+      "detected_change_point_utc": "2007-10-25T07:00:16+00:00",
+      "detected_change_point_local": "2007-10-25T09:00:16+02:00",
+      "signed_delay_minutes": 59.045006416666666,
+      "absolute_error_minutes": 59.045006416666666,
+      "status": "detected",
+      "false_alarm": false,
+      "missed_detection": false,
+      "active_sensors": [
+        "5"
+      ],
+      "used_sensors": [
+        "5"
+      ],
+      "grid_points": 120,
+      "statistic_at_detection": 5.281046764706515,
+      "notes": [],
+      "sensor_parameters_used": {
+        "5": {
+          "used": true,
+          "mu_0": 1.1199025450300053,
+          "mu_1": 23.656973022832133,
+          "sigma2": 244.86254981827784,
+          "D_i": 1.0371523658852024
+        }
+      }
     }
   ],
-  "generated_at_utc": "2026-05-07T03:16:50.326149+00:00"
+  "generated_at_utc": "2026-05-07T04:40:57.648294+00:00"
 }

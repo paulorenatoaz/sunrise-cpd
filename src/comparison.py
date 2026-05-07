@@ -196,7 +196,11 @@ def build_comparison_payload() -> dict:
     if raw_payloads:
         ref = next(iter(raw_payloads.values()))
         detector_signature = {
+            "detector_mode": ref.get("detector_mode"),
             "detector_name": ref.get("detector_name"),
+            "evidence_type": ref.get("evidence_type"),
+            "parameter_source": ref.get("parameter_source"),
+            "global_parameter_file": ref.get("global_parameter_file"),
             "detector_parameters": ref.get("detector_parameters"),
             "threshold": ref.get("threshold"),
             "tolerance_minutes": ref.get("tolerance_minutes"),
@@ -204,6 +208,7 @@ def build_comparison_payload() -> dict:
             "aggregation": ref.get("aggregation"),
             "consistent_across_scenarios": all(
                 p.get("detector_name") == ref.get("detector_name")
+                and p.get("detector_mode") == ref.get("detector_mode")
                 and p.get("threshold") == ref.get("threshold")
                 and p.get("detector_parameters") == ref.get("detector_parameters")
                 and p.get("analysis_window") == ref.get("analysis_window")
@@ -297,10 +302,13 @@ def render_comparison_report(out_path: Path = COMPARISON_HTML,
 
     # Detector signature.
     sig_rows = [
+        ["Detector mode", sig.get("detector_mode")],
         ["Detector name", sig.get("detector_name")],
+        ["Evidence type", sig.get("evidence_type")],
         ["Aggregation", sig.get("aggregation")],
+        ["Parameter source", sig.get("parameter_source")],
+        ["Global parameter file", sig.get("global_parameter_file") or "n/a"],
         ["Threshold h", sig.get("threshold")],
-        ["Drift k", (sig.get("detector_parameters") or {}).get("drift_k")],
         ["Tolerance (min)", sig.get("tolerance_minutes")],
         ["Pre window (min)",
          (sig.get("analysis_window") or {}).get("pre_window_minutes")],

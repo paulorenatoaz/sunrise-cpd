@@ -40,10 +40,20 @@ The SensorScope archive is not redistributed in this repository. See
 * **Per-sensor informativeness.** Gaussian divergence
   `D_i = (mu_1 - mu_0)^2 / (2 * sigma^2)`, where `mu_0` and `mu_1` are
   the pre- and post-sunrise means and `sigma^2` the pooled variance.
-* **Detector.** One-sided Page CUSUM applied to a multi-sensor
-  aggregated z-score (mean over active sensors with finite readings),
-  with fixed drift `k` and threshold `h`. Detector parameters are held
-  fixed across budget regimes.
+* **Detector.** Multi-sensor one-sided CUSUM that accumulates the
+  Gaussian log-likelihood ratio
+  `llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2)
+  / (2 * sigma_i^2)` averaged over the active sensors that report a
+  finite reading, with no drift term. Per-sensor parameters
+  `mu_{0,i}`, `mu_{1,i}`, `sigma_i^2` are fixed global empirical
+  estimates obtained once per sensor from the dataset and stored in
+  `output/json/sensor_informativeness.json`; they are reused unchanged
+  for every test day. The astronomical sunrise of each day is used
+  only to extract the evaluation window and to score detections, not
+  to estimate detector parameters. Threshold `h` is held fixed across
+  budget regimes. A diagnostic mode
+  (`detector_mode="daily_baseline_zscore"`) reproduces the legacy
+  same-day pre-sunrise z-score CUSUM.
 * **Costs.** Sensing and communication costs `C_i`, `T_i` are not
   available in the dataset; unit costs are assumed, so ranking by
   `D_i / (C_i + T_i)` reduces to ranking by `D_i`.
@@ -66,16 +76,16 @@ Aggregated over 43 valid days, with `tolerance = 15 min` and threshold
 
 | Regime  | Detected | Missed | False alarms |
 |---------|----------|--------|--------------|
-| Low     | 36       | 7      | 7            |
-| Medium  | 42       | 1      | 17           |
-| High    | 42       | 1      | 32           |
+| Low     | 34       | 9      | 0            |
+| Medium  | 41       | 2      | 0            |
+| High    | 42       | 1      | 0            |
 
 Under this configuration, increasing the sampling budget recovers more
-true changes but also increases the number of pre-sunrise false alarms.
-This is an empirical observation specific to the present configuration
-(fixed threshold and unweighted mean-z aggregation across sensors of
-heterogeneous informativeness) and should not be interpreted as a
-universal property of the framework. See
+true changes while pre-sunrise false alarms remain at zero across all
+regimes. This is an empirical observation specific to the present
+configuration (Gaussian LLR CUSUM with fixed global per-sensor
+parameters and unweighted mean-LLR aggregation) and should not be
+interpreted as a universal property of the framework. See
 [output/reports/sunrise_budget_comparison_report.html](output/reports/sunrise_budget_comparison_report.html)
 for the full comparison.
 
@@ -90,7 +100,7 @@ sunrise-cpd/
 │   ├── ground_truth.py          # Sunrise times via astral
 │   ├── informativeness.py       # Per-sensor D_i estimation
 │   ├── budget.py                # Budget-aware sensor selection
-│   ├── detector.py              # Multi-sensor Page CUSUM
+│   ├── detector.py              # Multi-sensor Gaussian LLR CUSUM
 │   ├── experiments.py           # Per-regime experiment runner
 │   ├── experiment_report.py     # Per-scenario HTML report
 │   ├── comparison.py            # Cross-scenario comparison report

@@ -21,7 +21,6 @@ import numpy as np
 import pandas as pd
 
 from . import paths
-from .detector import DetectorConfig
 from .experiments import (
     HIGH_BUDGET_RESULTS_JSON,
     LOW_BUDGET_RESULTS_JSON,
@@ -169,12 +168,17 @@ def _build_example_plot(results: dict) -> Path | None:
         return None
     grid = pd.DatetimeIndex(sorted(sub["timestamp_utc"].unique()), tz="UTC")
 
-    cfg = DetectorConfig(
-        threshold=results["threshold"],
-        drift_k=results["detector_parameters"]["drift_k"],
-    )
+    cfg_threshold = float(results["threshold"])
 
-    z_per_sensor: dict[str, np.ndarray] = {}
+    # Load fixed global Gaussian parameters per sensor.
+    from .informativeness import load_global_sensor_parameters
+    try:
+        global_params = load_global_sensor_parameters(
+            paths.SENSOR_INFORMATIVENESS_JSON)
+    except FileNotFoundError:
+        global_params = {}
+
+    llr_per_sensor: dict[str, np.ndarray] = {}
     sensor_series: dict[str, pd.Series] = {}
     for sid in selected:
         s = sub.loc[sub["station_id"] == sid, ["timestamp_utc", "value"]]
@@ -184,32 +188,29 @@ def _build_example_plot(results: dict) -> Path | None:
         series = (s.groupby("timestamp_utc")["value"].mean()
                    .astype(float).sort_index().reindex(grid))
         sensor_series[sid] = series
-        arr = series.to_numpy(dtype=float)
-        pre_mask = np.asarray(grid < sunrise)
-        pre = arr[pre_mask]
-        pre = pre[np.isfinite(pre)]
-        if len(pre) < cfg.min_baseline_samples:
+        params = global_params.get(str(sid))
+        if params is None:
             continue
-        mu = float(np.mean(pre))
-        sigma = (float(np.std(pre, ddof=1)) if len(pre) > 1
-                 else cfg.fallback_sigma)
-        if sigma <= 1e-6:
-            sigma = cfg.fallback_sigma
-        z_per_sensor[sid] = (arr - mu) / sigma
-    if not z_per_sensor:
+        arr = series.to_numpy(dtype=float)
+        mu_0 = params["mu_0"]
+        mu_1 = params["mu_1"]
+        sigma2 = params["sigma2"]
+        llr_per_sensor[sid] = ((arr - mu_0) ** 2 - (arr - mu_1) ** 2) / (
+            2.0 * sigma2)
+    if not llr_per_sensor:
         return None
 
-    z_matrix = np.vstack(list(z_per_sensor.values()))
-    finite = np.isfinite(z_matrix)
+    llr_matrix = np.vstack(list(llr_per_sensor.values()))
+    finite = np.isfinite(llr_matrix)
     counts = finite.sum(axis=0)
-    sums = np.where(finite, z_matrix, 0.0).sum(axis=0)
-    z_agg = np.where(counts > 0, sums / np.maximum(counts, 1), np.nan)
+    sums = np.where(finite, llr_matrix, 0.0).sum(axis=0)
+    l_agg = np.where(counts > 0, sums / np.maximum(counts, 1), np.nan)
 
     s = 0.0
     stat = []
-    for z in z_agg:
-        if np.isfinite(z):
-            s = max(0.0, s + float(z) - cfg.drift_k)
+    for l_t in l_agg:
+        if np.isfinite(l_t):
+            s = max(0.0, s + float(l_t))
         stat.append(s)
 
     paths.ensure_dirs()
@@ -232,8 +233,8 @@ def _build_example_plot(results: dict) -> Path | None:
     )
 
     axes[1].plot(grid, stat, color="#7a1f1f", label="Aggregated CUSUM S_t")
-    axes[1].axhline(cfg.threshold, color="black", linestyle="--",
-                    label=f"Threshold h={cfg.threshold}")
+    axes[1].axhline(cfg_threshold, color="black", linestyle="--",
+                    label=f"Threshold h={cfg_threshold}")
     axes[1].axvline(sunrise, color="#1b5e20", linestyle="--")
     if target["detected_change_point_utc"]:
         axes[1].axvline(pd.Timestamp(target["detected_change_point_utc"]),
@@ -382,27 +383,42 @@ def render_scenario_report(scenario: str,
                     "Valid days", "Missing rate"], rows)
         ))
 
-    params = results["detector_parameters"]
     sections.append(_section(
         "7. Detector",
-        "<p>One-sided multi-sensor Page CUSUM. At each timestamp the "
-        "detector standardizes every active sensor against its own "
-        "pre-sunrise baseline and aggregates by averaging the finite "
-        "z-scores:</p>"
+        "<p>The main detector is a multi-sensor one-sided CUSUM that "
+        "uses fixed global empirical Gaussian parameters per sensor. "
+        "These parameters "
+        "(<code>mu_{0,i}</code>, <code>mu_{1,i}</code>, "
+        "<code>sigma_i^2</code>) are estimated once from the SensorScope "
+        "sunrise dataset and stored in "
+        "<code>output/json/sensor_informativeness.json</code>; the same "
+        "parameters are reused unchanged for every test day. The "
+        "astronomical sunrise of each day is used only to extract the "
+        "evaluation window and to score detections; it is not used to "
+        "estimate any detector parameter in this mode. The per-sensor "
+        "Gaussian divergence "
+        "<code>D_i = (mu_{1,i} - mu_{0,i})^2 / (2 sigma_i^2)</code> is "
+        "computed from the same global parameters used by the detector. "
+        "At each timestamp, the per-sensor Gaussian log-likelihood ratio "
+        "is averaged over the active sensors that report a finite "
+        "reading and accumulated by a one-sided CUSUM:</p>"
         "<pre><code>"
-        "z_{i,t} = (x_{i,t} - mu_{0,i}) / sigma_{0,i}\n"
-        "Z_t    = mean_{i in S_t} z_{i,t}\n"
-        "S_t    = max(0, S_{t-1} + Z_t - k)\n"
-        "tau    = min { t : S_t &gt;= h }"
+        "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - "
+        "(x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2)\n"
+        "L_t       = mean_{i in S_t} llr_{i,t}\n"
+        "S_t       = max(0, S_{t-1} + L_t)\n"
+        "tau       = min { t : S_t &gt;= h }"
         "</code></pre>"
         f"<p>{escape(results['detector_aggregation_description'])}</p>"
         + _table(["Parameter", "Value"], [
+            ["Detector mode", results.get("detector_mode")],
             ["Detector name", results["detector_name"]],
+            ["Evidence type", results.get("evidence_type")],
             ["Aggregation", results["aggregation"]],
-            ["Drift k", params["drift_k"]],
+            ["Parameter source", results.get("parameter_source")],
+            ["Global parameter file",
+             results.get("global_parameter_file") or "n/a"],
             ["Threshold h", results["threshold"]],
-            ["Min baseline samples", params["min_baseline_samples"]],
-            ["Fallback sigma", params["fallback_sigma"]],
             ["Pre window (min)",
              results["analysis_window"]["pre_window_minutes"]],
             ["Post window (min)",

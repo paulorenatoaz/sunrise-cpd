@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-05-07T03:51:15.116170+00:00",
+  "generated_at_utc": "2026-05-07T04:41:28.115062+00:00",
   "scenarios": [
     {
       "scenario_name": "low_budget",
@@ -8,16 +8,16 @@
         "5"
       ],
       "n_active_sensors": 1,
-      "detected_days_count": 36,
-      "missed_detection_count": 7,
-      "false_alarm_count": 7,
-      "mean_signed_delay_minutes": -8.112262936574076,
-      "median_signed_delay_minutes": -0.661427475,
-      "mean_absolute_error_minutes": 12.848523924537039,
-      "median_absolute_error_minutes": 3.6794685833333336,
-      "std_signed_delay_minutes": 23.459467639517815,
-      "min_signed_delay_minutes": -99.60155126666668,
-      "max_signed_delay_minutes": 17.02833975
+      "detected_days_count": 34,
+      "missed_detection_count": 9,
+      "false_alarm_count": 0,
+      "mean_signed_delay_minutes": 66.57920029754901,
+      "median_signed_delay_minutes": 63.560623633333336,
+      "mean_absolute_error_minutes": 66.57920029754901,
+      "median_absolute_error_minutes": 63.560623633333336,
+      "std_signed_delay_minutes": 29.146616828408344,
+      "min_signed_delay_minutes": 26.388706483333333,
+      "max_signed_delay_minutes": 115.34550365
     },
     {
       "scenario_name": "medium_budget",
@@ -28,16 +28,16 @@
         "4"
       ],
       "n_active_sensors": 3,
-      "detected_days_count": 42,
-      "missed_detection_count": 1,
-      "false_alarm_count": 17,
-      "mean_signed_delay_minutes": -31.099040564285712,
-      "median_signed_delay_minutes": -11.628574766666667,
-      "mean_absolute_error_minutes": 31.56115285952381,
-      "median_absolute_error_minutes": 11.628574766666667,
-      "std_signed_delay_minutes": 35.728342898014034,
-      "min_signed_delay_minutes": -110.48055048333335,
-      "max_signed_delay_minutes": 5.511673083333333
+      "detected_days_count": 41,
+      "missed_detection_count": 2,
+      "false_alarm_count": 0,
+      "mean_signed_delay_minutes": 60.65419232276423,
+      "median_signed_delay_minutes": 63.34705073333334,
+      "mean_absolute_error_minutes": 60.65419232276423,
+      "median_absolute_error_minutes": 63.34705073333334,
+      "std_signed_delay_minutes": 15.363730727674968,
+      "min_signed_delay_minutes": 28.388706483333333,
+      "max_signed_delay_minutes": 92.934942
     },
     {
       "scenario_name": "high_budget",
@@ -56,23 +56,25 @@
       "n_active_sensors": 9,
       "detected_days_count": 42,
       "missed_detection_count": 1,
-      "false_alarm_count": 32,
-      "mean_signed_delay_minutes": -59.55419929444445,
-      "median_signed_delay_minutes": -61.17660230833333,
-      "mean_absolute_error_minutes": 59.55419929444445,
-      "median_absolute_error_minutes": 61.17660230833333,
-      "std_signed_delay_minutes": 39.84062478800366,
-      "min_signed_delay_minutes": -117.60685826666666,
-      "max_signed_delay_minutes": -3.7752913500000003
+      "false_alarm_count": 0,
+      "mean_signed_delay_minutes": 62.9715943563492,
+      "median_signed_delay_minutes": 65.339351375,
+      "mean_absolute_error_minutes": 62.9715943563492,
+      "median_absolute_error_minutes": 65.339351375,
+      "std_signed_delay_minutes": 16.453661252020655,
+      "min_signed_delay_minutes": 28.398448733333332,
+      "max_signed_delay_minutes": 113.13507773333335
     }
   ],
   "detector_signature": {
-    "detector_name": "one_sided_page_cusum_multi_sensor",
+    "detector_mode": "global_gaussian_llr",
+    "detector_name": "global_gaussian_llr_cusum_multi_sensor",
+    "evidence_type": "gaussian_log_likelihood_ratio",
+    "parameter_source": "global_empirical_sensor_parameters",
+    "global_parameter_file": "output/json/sensor_informativeness.json",
     "detector_parameters": {
-      "drift_k": 0.5,
-      "min_baseline_samples": 5,
-      "fallback_sigma": 1.0,
-      "formula": "z_{i,t} = (x_{i,t} - mu_{0,i})/sigma_{0,i}; Z_t = mean_{i in S_t} z_{i,t}; S_t = max(0, S_{t-1} + Z_t - k); detect when S_t >= h."
+      "evidence_type": "gaussian_log_likelihood_ratio",
+      "formula": "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2); L_t = mean_{i in S_t} llr_{i,t}; S_t = max(0, S_{t-1} + L_t); detect when S_t >= h."
     },
     "threshold": 5.0,
     "tolerance_minutes": 15,
@@ -81,17 +83,16 @@
       "post_window_minutes": 120,
       "sync_freq": "2min"
     },
-    "aggregation": "mean_z",
+    "aggregation": "mean_llr",
     "consistent_across_scenarios": true
   },
   "interpretation": {
     "detected_days_trend": "monotonic_improvement",
-    "false_alarm_trend": "monotonic_increase",
-    "mean_absolute_error_trend": "monotonic_degradation",
-    "verdict": "degradation",
+    "false_alarm_trend": "flat",
+    "mean_absolute_error_trend": "mixed",
+    "verdict": "partial_improvement",
     "findings": [
-      "Detected-days count grows monotonically with the budget.",
-      "False-alarm count rises monotonically with the budget."
+      "Detected-days count grows monotonically with the budget."
     ],
     "candidate_factors": [
       "redundant sensors among the top of the D_i ranking",

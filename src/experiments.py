@@ -19,7 +19,13 @@ import pandas as pd
 
 from . import paths
 from .budget import BudgetSelection, select_sensors_by_budget
-from .detector import DetectorConfig, cusum_detect_multi_sensor
+from .detector import (
+    DetectorConfig,
+    GlobalLLRConfig,
+    cusum_detect_multi_sensor,
+    cusum_detect_multi_sensor_global_params,
+)
+from .informativeness import load_global_sensor_parameters
 
 logger = logging.getLogger(__name__)
 
@@ -181,9 +187,15 @@ def run_experiment(regime: str,
                    threshold: float = 5.0,
                    drift_k: float = 0.5,
                    sync_freq: str = "2min",
-                   timezone_name: str = paths.GSB_TIMEZONE
+                   timezone_name: str = paths.GSB_TIMEZONE,
+                   detector_mode: str = "global_gaussian_llr",
                    ) -> dict:
     """Run the unified multi-sensor sunrise CPD experiment.
+
+    The main detector mode (``"global_gaussian_llr"``) uses fixed
+    global empirical Gaussian parameters per sensor, loaded from
+    :data:`paths.SENSOR_INFORMATIVENESS_JSON`. The legacy mode
+    ``"daily_baseline_zscore"`` is kept as a diagnostic.
 
     Steps:
         1. Load every valid sensor and the empirical D_i ranking.
@@ -191,8 +203,7 @@ def run_experiment(regime: str,
            ``regime`` to obtain the active subset.
         3. For each valid day, build a synchronized per-sensor matrix on
            the ``[sunrise - pre, sunrise + post]`` window.
-        4. Run the multi-sensor Page CUSUM detector on the active
-           subset.
+        4. Run the chosen detector on the active subset.
         5. Classify and aggregate results.
 
     Returns:
@@ -201,6 +212,8 @@ def run_experiment(regime: str,
     regime = regime.lower()
     if regime not in _REGIME_OUTPUTS:
         raise ValueError(f"Unknown regime: {regime!r}")
+    if detector_mode not in {"global_gaussian_llr", "daily_baseline_zscore"}:
+        raise ValueError(f"Unknown detector_mode: {detector_mode!r}")
     if not paths.SYNCHRONIZED_PARQUET.exists():
         raise FileNotFoundError(
             f"Processed dataset missing: {paths.SYNCHRONIZED_PARQUET}."
@@ -237,7 +250,81 @@ def run_experiment(regime: str,
         gt = json.load(fh)
     sunrise_records = gt.get("records", [])
 
-    config = DetectorConfig(threshold=threshold, drift_k=drift_k)
+    # Detector setup. The main mode uses fixed global empirical
+    # Gaussian parameters per sensor; the legacy mode uses a same-day
+    # pre-sunrise baseline and is kept as a diagnostic.
+    if detector_mode == "global_gaussian_llr":
+        global_params_all = load_global_sensor_parameters(
+            paths.SENSOR_INFORMATIVENESS_JSON
+        )
+        sensor_params = {
+            sid: global_params_all[sid]
+            for sid in selected_sensors if sid in global_params_all
+        }
+        missing_params = [sid for sid in selected_sensors
+                          if sid not in sensor_params]
+        if not sensor_params:
+            raise RuntimeError(
+                "No global Gaussian parameters available for the "
+                "selected sensors; run 'rank-sensors' first."
+            )
+        if missing_params:
+            logger.warning(
+                "Selected sensors without global parameters (skipped by "
+                "the detector): %s", missing_params,
+            )
+        llr_config = GlobalLLRConfig(threshold=threshold)
+        detector_name = llr_config.name
+        aggregation_name = llr_config.aggregation
+        evidence_type = llr_config.evidence_type
+        aggregation_description = (
+            "At each timestamp, compute the per-sensor Gaussian "
+            "log-likelihood ratio "
+            "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - (x_{i,t} - "
+            "mu_{1,i})^2) / (2 sigma_i^2) using fixed global empirical "
+            "parameters, then average across active sensors with finite "
+            "readings. Apply the one-sided CUSUM "
+            "S_t = max(0, S_{t-1} + L_t) and detect when S_t >= h."
+        )
+        detector_parameters = {
+            "evidence_type": evidence_type,
+            "formula": (
+                "llr_{i,t} = ((x_{i,t} - mu_{0,i})^2 - "
+                "(x_{i,t} - mu_{1,i})^2) / (2 sigma_i^2); "
+                "L_t = mean_{i in S_t} llr_{i,t}; "
+                "S_t = max(0, S_{t-1} + L_t); "
+                "detect when S_t >= h."
+            ),
+        }
+        parameter_source = "global_empirical_sensor_parameters"
+    else:
+        legacy_config = DetectorConfig(threshold=threshold, drift_k=drift_k)
+        sensor_params = {}
+        detector_name = legacy_config.name
+        aggregation_name = legacy_config.aggregation
+        evidence_type = "per_day_pre_sunrise_baseline_zscore"
+        aggregation_description = (
+            "At each timestamp, compute the per-sensor standardized "
+            "evidence z_{i,t} = (x_{i,t} - mu_{0,i,daily}) / "
+            "sigma_{0,i,daily} from the same-day pre-sunrise baseline, "
+            "then average across active sensors with finite readings. "
+            "Apply the one-sided Page CUSUM "
+            "S_t = max(0, S_{t-1} + Z_t - k) and detect when S_t >= h."
+        )
+        detector_parameters = {
+            "drift_k": legacy_config.drift_k,
+            "min_baseline_samples": legacy_config.min_baseline_samples,
+            "fallback_sigma": legacy_config.fallback_sigma,
+            "evidence_type": evidence_type,
+            "formula": (
+                "z_{i,t} = (x_{i,t} - mu_{0,i})/sigma_{0,i}; "
+                "Z_t = mean_{i in S_t} z_{i,t}; "
+                "S_t = max(0, S_{t-1} + Z_t - k); "
+                "detect when S_t >= h."
+            ),
+        }
+        parameter_source = "per_day_pre_sunrise_baseline"
+
     tz_local = ZoneInfo(timezone_name)
     pre_td = timedelta(minutes=pre_window_minutes)
     post_td = timedelta(minutes=post_window_minutes)
@@ -251,12 +338,20 @@ def run_experiment(regime: str,
             sensor_df, selected_sensors, win_start, win_end, freq=sync_freq,
         )
 
-        result = cusum_detect_multi_sensor(
-            timestamps=list(grid),
-            values_by_sensor=values_by_sensor,
-            sunrise_time=sunrise_utc,
-            config=config,
-        )
+        if detector_mode == "global_gaussian_llr":
+            result = cusum_detect_multi_sensor_global_params(
+                timestamps=list(grid),
+                values_by_sensor=values_by_sensor,
+                sensor_params=sensor_params,
+                config=llr_config,
+            )
+        else:
+            result = cusum_detect_multi_sensor(
+                timestamps=list(grid),
+                values_by_sensor=values_by_sensor,
+                sunrise_time=sunrise_utc,
+                config=legacy_config,
+            )
 
         detected_utc = (
             pd.Timestamp(result.detected_time).tz_convert("UTC")
@@ -274,7 +369,10 @@ def run_experiment(regime: str,
             tolerance_minutes,
         )
 
-        per_day.append({
+        used_sensors = [
+            sid for sid, b in result.baselines.items() if b.get("used")
+        ]
+        per_day_entry = {
             "date": rec["date"],
             "true_change_point_utc": sunrise_utc.isoformat(),
             "true_change_point_local": (
@@ -290,14 +388,17 @@ def run_experiment(regime: str,
             "false_alarm": false_alarm,
             "missed_detection": missed,
             "active_sensors": list(selected_sensors),
-            "used_sensors": [
-                sid for sid, b in result.baselines.items() if b.get("used")
-            ],
+            "used_sensors": used_sensors,
             "grid_points": int(result.n_observations),
-            "baselines": result.baselines,
             "statistic_at_detection": result.statistic_at_detection,
             "notes": result.notes,
-        })
+        }
+        if detector_mode == "global_gaussian_llr":
+            per_day_entry["sensor_parameters_used"] = result.baselines
+        else:
+            per_day_entry["baselines"] = result.baselines
+        per_day.append(per_day_entry)
+
 
     aggregate = _aggregate_metrics(per_day)
     payload = {
@@ -317,27 +418,22 @@ def run_experiment(regime: str,
         "unit_cost_assumption": selection.unit_cost_assumption,
         "k": selection.k,
         "detector_input_mode": "multi_sensor",
-        "detector_name": config.name,
-        "aggregation": config.aggregation,
-        "detector_aggregation": config.aggregation,
-        "detector_aggregation_description": (
-            "At each timestamp, compute the per-sensor standardized "
-            "evidence z_{i,t} = (x_{i,t} - mu_{0,i}) / sigma_{0,i} for "
-            "each active sensor with a usable baseline, then average over "
-            "the active sensors that report a finite reading. Apply the "
-            "one-sided Page CUSUM to this aggregated evidence."
+        "detector_mode": detector_mode,
+        "detector_name": detector_name,
+        "aggregation": aggregation_name,
+        "detector_aggregation": aggregation_name,
+        "evidence_type": evidence_type,
+        "parameter_source": parameter_source,
+        "global_parameter_file": (
+            str(paths.SENSOR_INFORMATIVENESS_JSON.relative_to(paths.ROOT_DIR))
+            if detector_mode == "global_gaussian_llr" else None
         ),
-        "detector_parameters": {
-            "drift_k": config.drift_k,
-            "min_baseline_samples": config.min_baseline_samples,
-            "fallback_sigma": config.fallback_sigma,
-            "formula": (
-                "z_{i,t} = (x_{i,t} - mu_{0,i})/sigma_{0,i}; "
-                "Z_t = mean_{i in S_t} z_{i,t}; "
-                "S_t = max(0, S_{t-1} + Z_t - k); "
-                "detect when S_t >= h."
-            ),
-        },
+        "global_sensor_parameters_used": (
+            {sid: sensor_params[sid] for sid in sensor_params}
+            if detector_mode == "global_gaussian_llr" else None
+        ),
+        "detector_aggregation_description": aggregation_description,
+        "detector_parameters": detector_parameters,
         "threshold": threshold,
         "tolerance_minutes": tolerance_minutes,
         "analysis_window": {

@@ -182,3 +182,133 @@ def cusum_detect_window(timestamps: Sequence[pd.Timestamp],
         sunrise_time=pd.Timestamp(sunrise_time),
         config=config,
     )
+
+
+# ---------------------------------------------------------------------------
+# Global-parameter Gaussian LLR CUSUM (main detector)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class GlobalLLRConfig:
+    """Configuration for :func:`cusum_detect_multi_sensor_global_params`.
+
+    The detector uses fixed global empirical Gaussian parameters per
+    sensor (estimated once across the whole dataset, see
+    :func:`src.informativeness.load_global_sensor_parameters`) and does
+    not estimate any same-day baseline.
+
+    The per-observation evidence is the Gaussian log-likelihood ratio
+    between the post-change and pre-change densities,
+
+        llr_{i,t} = ((x_{i,t} - mu_0,i)^2 - (x_{i,t} - mu_1,i)^2)
+                    / (2 * sigma_i^2),
+
+    aggregated by mean over the active sensors that report a finite
+    reading at time ``t``. The aggregated evidence drives a one-sided
+    CUSUM with no drift term:
+
+        S_t = max(0, S_{t-1} + L_t),
+        tau = min { t : S_t >= h }.
+    """
+
+    threshold: float = 5.0
+    name: str = "global_gaussian_llr_cusum_multi_sensor"
+    aggregation: str = "mean_llr"
+    evidence_type: str = "gaussian_log_likelihood_ratio"
+
+
+def cusum_detect_multi_sensor_global_params(
+        timestamps: Sequence[pd.Timestamp],
+        values_by_sensor: dict[str, np.ndarray],
+        sensor_params: dict[str, dict],
+        config: GlobalLLRConfig,
+        ) -> DetectionResult:
+    """Run the global-parameter Gaussian LLR CUSUM detector.
+
+    Args:
+        timestamps: Common timestamp grid (UTC, ascending) for the
+            window. Length ``T``.
+        values_by_sensor: Mapping ``sensor_id -> array of length T``
+            holding each sensor's readings on the grid; NaN denotes
+            missing observations.
+        sensor_params: Mapping ``sensor_id -> {mu_0, mu_1, sigma2, ...}``
+            of fixed global empirical parameters. Sensors absent from
+            this mapping are skipped.
+        config: Detector configuration.
+    """
+    notes: list[str] = []
+    if not values_by_sensor:
+        return DetectionResult(None, None, 0, {}, ["No sensors selected."])
+    if len(timestamps) == 0:
+        return DetectionResult(None, None, 0, {},
+                               ["No observations in window."])
+
+    ts = pd.DatetimeIndex(pd.to_datetime(list(timestamps), utc=True))
+
+    used_params: dict[str, dict] = {}
+    llr_per_sensor: dict[str, np.ndarray] = {}
+    for sid, vals in values_by_sensor.items():
+        arr = np.asarray(vals, dtype=float)
+        if arr.shape[0] != len(ts):
+            raise ValueError(
+                f"Sensor {sid} array length {arr.shape[0]} does not "
+                f"match timestamp grid length {len(ts)}."
+            )
+        params = sensor_params.get(str(sid))
+        if params is None:
+            notes.append(
+                f"Sensor {sid}: no global parameters available; "
+                "excluded from this day's aggregate."
+            )
+            used_params[str(sid)] = {"used": False, "reason": "no_params"}
+            continue
+        mu_0 = float(params["mu_0"])
+        mu_1 = float(params["mu_1"])
+        sigma2 = float(params["sigma2"])
+        if not (np.isfinite(mu_0) and np.isfinite(mu_1)
+                and np.isfinite(sigma2) and sigma2 > 0):
+            notes.append(
+                f"Sensor {sid}: invalid global parameters; skipped."
+            )
+            used_params[str(sid)] = {"used": False, "reason": "invalid_params"}
+            continue
+        llr = ((arr - mu_0) ** 2 - (arr - mu_1) ** 2) / (2.0 * sigma2)
+        llr_per_sensor[str(sid)] = llr
+        used_params[str(sid)] = {
+            "used": True,
+            "mu_0": mu_0,
+            "mu_1": mu_1,
+            "sigma2": sigma2,
+            "D_i": params.get("D_i"),
+        }
+
+    if not llr_per_sensor:
+        return DetectionResult(None, None, len(ts), used_params,
+                               notes + ["No sensors had global parameters."])
+
+    llr_matrix = np.vstack([llr_per_sensor[sid]
+                            for sid in llr_per_sensor])
+    finite_mask = np.isfinite(llr_matrix)
+    counts = finite_mask.sum(axis=0)
+    sums = np.where(finite_mask, llr_matrix, 0.0).sum(axis=0)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        l_agg = np.where(counts > 0, sums / np.maximum(counts, 1), np.nan)
+
+    s = 0.0
+    detected_idx: int | None = None
+    detection_stat: float | None = None
+    for i, l_t in enumerate(l_agg):
+        if not np.isfinite(l_t):
+            continue
+        s = max(0.0, s + float(l_t))
+        if s >= config.threshold:
+            detected_idx = i
+            detection_stat = s
+            break
+
+    detected_time = (
+        ts[detected_idx].to_pydatetime() if detected_idx is not None else None
+    )
+    return DetectionResult(detected_time, detection_stat, len(ts),
+                           used_params, notes)
+
