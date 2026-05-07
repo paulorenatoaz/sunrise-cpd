@@ -318,15 +318,18 @@ def cmd_run_sunrise_experiment(args: argparse.Namespace) -> int:
     print(f"[run-sunrise-experiment] Candidate sensors: "
           f"{payload['full_candidate_sensors']}")
     print(f"[run-sunrise-experiment] Budget value B = "
-          f"{payload['budget_value']} ({payload['cost_model']})")
+          f"{payload['sensing_budget']}, transmission C = "
+          f"{payload['transmission_budget']} ({payload['cost_model']})")
     print(f"[run-sunrise-experiment] Dynamic selection: "
           f"{payload['dynamic_selection']} | policy: "
-          f"greedy_information_per_cost")
+          f"greedy_D_i_two_budgets_with_local_reference")
     sel_summary = payload.get("selected_sensors_summary", {})
     print(f"[run-sunrise-experiment] Sensors ever selected: "
           f"{sel_summary.get('sensors_ever_selected')}")
     print(f"[run-sunrise-experiment] Days processed: {payload['number_of_days']}")
-    print(f"[run-sunrise-experiment] Detected: {agg['detected_days_count']}, "
+    print(f"[run-sunrise-experiment] Detected: {agg['detected_days_count']} "
+          f"(on time: {agg['on_time_count']}, "
+          f"late: {agg['late_detection_count']}), "
           f"missed: {agg['missed_detection_count']}, "
           f"false alarms: {agg['false_alarm_count']}")
     print(f"[run-sunrise-experiment] Mean signed delay: "

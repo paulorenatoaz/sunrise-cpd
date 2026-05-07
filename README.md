@@ -54,45 +54,59 @@ The SensorScope archive is not redistributed in this repository. See
   budget regimes. A diagnostic mode
   (`detector_mode="daily_baseline_zscore"`) reproduces the legacy
   same-day pre-sunrise z-score CUSUM.
-* **Costs.** Sensing and communication costs `C_i`, `T_i` are not
-  measured in the dataset. The pipeline applies an explicit unit-cost
-  assumption (`C_i = 1.0`, `T_i = 0.0`, `total cost 1.0`) recorded in
-  [output/json/sensor_costs.json](output/json/sensor_costs.json), so
-  the information-per-cost score reduces to `D_i`.
+* **Costs.** Sensing and transmission costs `C_i`, `T_i` are not
+  measured in the dataset. The pipeline applies an explicit
+  homogeneous synthetic cost assumption (`C_i = 1.0`, `T_i = 1.0`)
+  recorded in
+  [output/json/sensor_costs.json](output/json/sensor_costs.json). The
+  local/reference sensor's effective transmission cost is set to `0`
+  only dynamically inside the per-timestamp selection step.
 
-## Budget regimes
+## Two-budget regimes
 
 The same multi-sensor system is used in all regimes. Each regime is
-defined by an explicit numeric budget `B` over the per-sensor cost
-`C_i + T_i`. At every timestamp `t`, the dynamic budget policy in
-`src/budget.py` selects an active subset
-`S(t) ⊆ {1, …, M}` greedily by `D_i / (C_i + T_i)` under the
-constraint `Σ_{i ∈ S(t)} (C_i + T_i) ≤ B`. Selection is therefore
-*per-timestamp*, not a fixed sensor subset; the active sensor(s) may
-change over time depending on availability.
+defined by **two** explicit numeric budgets, mirroring the paper:
 
-| Regime  | Budget `B`         | Typical `\|S(t)\|` (unit cost) |
-|---------|--------------------|--------------------------------|
-| Low     | `B = 1.0`          | up to 1 active sensor          |
-| Medium  | `B = 3.0`          | up to 3 active sensors         |
-| High    | `B = \|valid\|`    | all available sensors          |
+```
+Σ_{i ∈ S(t)} C_i  ≤  sensing_budget B
+Σ_{i ∈ S(t)} T_i  ≤  transmission_budget C
+```
+
+At every timestamp `t`, the dynamic two-budget policy in
+`src/budget.py` selects an active subset `S(t) ⊆ {1, …, M}` greedily
+by `D_i`. The first selected sensor at `t` is the **local/reference
+sensor** (effective transmission cost `0`); each additional selected
+sensor is a **cooperative/remote sensor** that pays its full nominal
+transmission cost. Selection is therefore *per-timestamp*; the
+local/reference sensor is not fixed and may change over time. Under
+homogeneous costs, ranking by `D_i` is equivalent to ranking by
+information per cost; the implementation supports heterogeneous costs
+without changing the policy code.
+
+| Regime  | Sensing `B`     | Transmission `C` | Typical `\|S(t)\|`              |
+|---------|-----------------|------------------|---------------------------------|
+| Low     | `B = 1.0`       | `C = 0.0`        | 1 local sensor, 0 cooperative    |
+| Medium  | `B = 3.0`       | `C = 2.0`        | 1 local + up to 2 cooperative    |
+| High    | `B = \|valid\|` | `C = \|valid\|-1`| all available sensors            |
 
 ## Summary of empirical results
 
-Aggregated over 43 valid days, with `tolerance = 15 min` and threshold
-`h = 5.0`, under the unit-cost assumption:
+Aggregated over 43 valid days, with `tolerance = 15 min`, threshold
+`h = 5.0`, a 2-min common time grid, and the homogeneous synthetic
+cost assumption:
 
-| Regime  | `B`  | Detected | Missed | False alarms |
-|---------|------|----------|--------|--------------|
-| Low     | 1.0  | 42       | 1      | 0            |
-| Medium  | 3.0  | 42       | 1      | 0            |
-| High    | 9.0  | 42       | 1      | 0            |
+| Regime  | `B` / `C`   | Detected | On time | Late | Missed | False alarms |
+|---------|-------------|----------|---------|------|--------|--------------|
+| Low     | 1.0 / 0.0   | 39       | 0       | 39   | 4      | 0            |
+| Medium  | 3.0 / 2.0   | 41       | 0       | 41   | 2      | 0            |
+| High    | 9.0 / 8.0   | 41       | 0       | 41   | 2      | 0            |
 
-The dynamic policy distributes the low-budget activations over the
-sensors that are actually available at each timestamp, rather than
-locking onto a single sensor for the whole run; the union of sensors
-ever selected at low budget covers the full valid sensor set across
-the 43 days. See
+Detections are classified as one of `on_time`, `late_detection`,
+`false_alarm`, or `missed_detection`. The dynamic two-budget policy
+distributes the low-budget activations over the sensors that are
+actually available at each timestamp; the union of sensors ever
+selected at low budget covers the full valid sensor set across the 43
+days. See
 [output/reports/sunrise_budget_comparison_report.html](output/reports/sunrise_budget_comparison_report.html)
 for the full comparison.
 

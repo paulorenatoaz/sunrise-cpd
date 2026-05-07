@@ -23,21 +23,23 @@ For each valid day in the dataset:
 - the detection error is computed by comparing the detected time with the true sunrise time.
 
 The first version of the project covers three budget regimes of the same
-multi-sensor model. The regimes differ only in the value of the available
-budget; they are not separate models and they do not correspond to fixed
-sensor subsets selected once at the start of the experiment. At each
-timestamp `t`, the sampling policy selects an active subset
-`S(t) ⊆ {1, ..., M}` of available sensors subject to the regime budget,
-and the detector is computed only from the sensors in `S(t)`.
+multi-sensor model. The regimes differ only in the values of the two
+separate resource budgets — sensing budget `B` and transmission
+budget `C`; they are not separate models and they do not correspond
+to fixed sensor subsets selected once at the start of the experiment.
+At each timestamp `t`, the sampling policy selects an active subset
+`S(t) ⊆ {1, ..., M}` of available sensors subject to both budget
+constraints (`Σ C_i ≤ B`, `Σ T_i ≤ C`), with the first selected
+sensor acting as the local/reference sensor (effective transmission
+cost `0`) and subsequent sensors as cooperative sensors. The detector
+is computed only from the sensors in `S(t)`.
 
-1. Low-budget regime: dynamic budget-constrained selection with a small
-   budget. Under the unit-cost approximation used in the first version,
-   the policy may activate at most one available sensor per timestamp.
-2. Medium-budget regime: dynamic budget-constrained selection with an
-   intermediate budget, allowing a limited subset of available sensors
-   per timestamp.
-3. High-budget regime: dynamic budget-constrained selection with enough
-   budget to activate all available sensors at each timestamp.
+1. Low-budget regime (`B = 1.0`, `C = 0.0`): at most one sensor per
+   timestamp (the local/reference sensor); no cooperative sensors.
+2. Medium-budget regime (`B = 3.0`, `C = 2.0`): one local/reference
+   sensor plus up to two cooperative sensors per timestamp.
+3. High-budget regime (`B = |valid|`, `C = |valid|-1`): enough budget
+   to activate all available sensors at each timestamp.
 
 The covert/adversarial part of the paper is outside the scope of this
 first implementation.
@@ -95,7 +97,7 @@ When sensing and communication costs are available, sensors are ranked by:
 \frac{D_i}{C_i + T_i}
 \]
 
-### 2.1 Dynamic Budget-Constrained Sampling
+### 2.1 Dynamic Two-Budget Sampling
 
 At each timestamp `t`, the sampling policy selects an active subset:
 
@@ -103,32 +105,52 @@ At each timestamp `t`, the sampling policy selects an active subset:
 S(t) \subseteq \{1, \ldots, M\}
 \]
 
-subject to a budget constraint of the form:
+subject to **two separate** budget constraints (mirroring the paper):
 
 \[
-\sum_{i \in S(t)} (C_i + T_i) \;\leq\; B
+\sum_{i \in S(t)} C_i \;\leq\; B
+\quad \text{and} \quad
+\sum_{i \in S(t)} T_i \;\leq\; C
 \]
 
 where:
 
 * `C_i` is the sensing/acquisition cost of sensor `i`;
-* `T_i` is the communication/transmission cost of sensor `i`;
-* `B` is the budget available in the current regime.
+* `T_i` is the transmission cost of sensor `i`;
+* `B` is the sensing budget for the current regime;
+* `C` is the transmission budget for the current regime.
 
-The per-sensor selection score is information per cost:
+At each timestamp the first selected sensor is treated as the
+**local/reference sensor** and pays an effective transmission cost of
+`0` because it does not need to transmit to itself; each additional
+selected sensor is a **cooperative/remote sensor** that pays its full
+nominal transmission cost. The local/reference sensor is *not* fixed:
+it is whichever available sensor has the highest `D_i` at that
+timestamp.
 
-\[
-\text{score}_i \;=\; \frac{D_i}{C_i + T_i}
-\]
+The per-sensor selection score is `D_i`. Under the homogeneous
+synthetic cost assumption (`C_i = 1.0`, `T_i = 1.0`) this is
+equivalent to ranking by information per cost; the implementation is
+structured so that heterogeneous costs can be added without changing
+the policy code.
+
+The three regimes are:
+
+| Regime  | Sensing `B`     | Transmission `C` | Effect                                |
+|---------|-----------------|------------------|---------------------------------------|
+| Low     | `1.0`           | `0.0`            | 1 local sensor only; no cooperation   |
+| Medium  | `3.0`           | `2.0`            | 1 local + up to 2 cooperative sensors |
+| High    | `\|valid\|`     | `\|valid\|-1`    | all available sensors (no constraint) |
 
 When real costs are unavailable, the project must use an explicit
-unit-cost model that is documented in the configuration and in the
-result JSON, rather than implicitly dropping the cost terms. Under unit
-costs, the budget reduces to a cardinality constraint, but selection
-must still be performed dynamically at each timestamp using the current
-availability of each sensor. Selecting a fixed subset once per scenario
-is only acceptable as a preliminary diagnostic approximation and must
-not be used as the final budget implementation.
+cost model that is documented in the configuration and in the result
+JSON, rather than implicitly dropping the cost terms. Selection must
+be performed dynamically at each timestamp using the current
+availability of each sensor; selecting a fixed subset once per
+scenario is only acceptable as a preliminary diagnostic approximation
+and must not be used as the final budget implementation. Sensors are
+aligned to a regular 2-min common time grid so that multiple sensors
+can be active at the same timestamp.
 
 ---
 

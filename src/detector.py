@@ -3,8 +3,12 @@
 The system is a multi-sensor wireless network governed by a
 budget-constrained sampling policy. The main detector
 (:func:`cusum_detect_dynamic_budget`) selects an active subset
-``S(t)`` at every timestamp by greedy information-per-cost ranking
-under the constraint ``sum_{i in S(t)} (C_i + T_i) <= B`` and then
+``S(t)`` at every timestamp by greedy ``D_i`` ranking under two
+separate budget constraints
+``sum_{i in S(t)} C_i <= sensing_budget B`` and
+``sum_{i in S(t)} T_i <= transmission_budget C``, with the first
+selected sensor treated as the local/reference sensor (effective
+transmission cost ``0``) and the rest as cooperative sensors. It then
 accumulates the per-sensor Gaussian log-likelihood ratio averaged over
 ``S(t)`` in a one-sided CUSUM with no drift term. Per-sensor Gaussian
 parameters ``(mu_{0,i}, mu_{1,i}, sigma_i^2)`` are fixed global
@@ -310,19 +314,25 @@ def cusum_detect_multi_sensor_global_params(
 class DynamicBudgetLLRConfig:
     """Configuration for :func:`cusum_detect_dynamic_budget`.
 
-    The detector is the global Gaussian LLR CUSUM of
-    :class:`GlobalLLRConfig`, but the active subset ``S(t)`` is selected
-    *dynamically at each timestamp* by an information-per-cost greedy
-    policy under the budget constraint
-    ``sum_{i in S(t)} (C_i + T_i) <= budget``.
+    The detector is the global Gaussian LLR CUSUM, but the active
+    subset ``S(t)`` is selected *dynamically at each timestamp* by the
+    two-budget greedy policy in :mod:`src.budget` under the constraints
+
+        sum_{i in S(t)} C_i  <=  sensing_budget
+        sum_{i in S(t)} T_i  <=  transmission_budget
+
+    where ``T_i`` is the *effective* transmission cost (zero for the
+    local/reference sensor and the nominal cost otherwise).
     """
 
     threshold: float = 5.0
-    budget: float = 1.0
-    name: str = "dynamic_budget_gaussian_llr_cusum_multi_sensor"
+    sensing_budget: float = 1.0
+    transmission_budget: float = 0.0
+    name: str = "dynamic_two_budget_gaussian_llr_cusum_multi_sensor"
     aggregation: str = "mean_llr_over_dynamic_subset"
     evidence_type: str = "gaussian_log_likelihood_ratio"
-    selection_policy: str = "greedy_information_per_cost"
+    selection_policy: str = (
+        "greedy_D_i_with_local_reference_under_two_budgets")
 
 
 def cusum_detect_dynamic_budget(
@@ -330,17 +340,20 @@ def cusum_detect_dynamic_budget(
         values_by_sensor: dict[str, np.ndarray],
         sensor_params: dict[str, dict],
         sensor_costs,            # Mapping[str, SensorCost]
-        budget: float,
+        sensing_budget: float,
+        transmission_budget: float,
         config: DynamicBudgetLLRConfig,
         ) -> DetectionResult:
-    """Run the dynamic budget-aware Gaussian LLR CUSUM detector.
+    """Run the dynamic two-budget Gaussian LLR CUSUM detector.
 
     At every timestamp ``t``:
 
         1. determine the available sensors (finite reading and a global
            parameter record);
-        2. greedily select ``S(t)`` by information-per-cost
-           ``D_i / (C_i + T_i)`` under the budget constraint;
+        2. greedily rank by ``D_i`` and select the local/reference
+           sensor (effective transmission cost ``0``) followed by
+           cooperative sensors (full transmission cost), enforcing both
+           budget constraints separately;
         3. compute the per-sensor Gaussian LLR for ``i in S(t)``;
         4. average over ``S(t)`` and update the one-sided CUSUM.
 
@@ -414,8 +427,12 @@ def cusum_detect_dynamic_budget(
 
     # Per-timestamp dynamic selection + CUSUM.
     selection_counts: dict[str, int] = {sid: 0 for sid in candidate_sensors}
+    local_counts: dict[str, int] = {sid: 0 for sid in candidate_sensors}
+    cooperative_counts: dict[str, int] = {sid: 0 for sid in candidate_sensors}
+    available_sizes = np.zeros(n_t, dtype=int)
     active_sizes = np.zeros(n_t, dtype=int)
-    used_budgets = np.zeros(n_t, dtype=float)
+    sensing_used_arr = np.zeros(n_t, dtype=float)
+    transmission_used_arr = np.zeros(n_t, dtype=float)
     timestamps_without_selection = 0
     s = 0.0
     detected_idx: int | None = None
@@ -426,6 +443,7 @@ def cusum_detect_dynamic_budget(
             sid for sid in candidate_sensors
             if np.isfinite(llr_per_sensor[sid][i])
         ]
+        available_sizes[i] = len(available_now)
         if not available_now:
             timestamps_without_selection += 1
             continue
@@ -433,19 +451,26 @@ def cusum_detect_dynamic_budget(
             available_sensors=available_now,
             sensor_informativeness=informativeness_map,
             sensor_costs=sensor_costs,
-            budget=budget,
+            sensing_budget=sensing_budget,
+            transmission_budget=transmission_budget,
+            timestamp=ts[i],
         )
         if not sel.selected_sensors:
             timestamps_without_selection += 1
             continue
         active_sizes[i] = len(sel.selected_sensors)
-        used_budgets[i] = sel.total_cost
+        sensing_used_arr[i] = sel.sensing_cost_used
+        transmission_used_arr[i] = sel.transmission_cost_used
         finite_llrs = []
         for sid in sel.selected_sensors:
             v = float(llr_per_sensor[sid][i])
             if np.isfinite(v):
                 finite_llrs.append(v)
                 selection_counts[sid] += 1
+        if sel.local_sensor is not None:
+            local_counts[sel.local_sensor] += 1
+        for sid in sel.cooperative_sensors:
+            cooperative_counts[sid] += 1
         if not finite_llrs:
             continue
         l_t = float(np.mean(finite_llrs))
@@ -453,8 +478,6 @@ def cusum_detect_dynamic_budget(
         if s >= config.threshold and detected_idx is None:
             detected_idx = i
             detection_stat = s
-            # Continue logging selection counts after detection? No,
-            # stop the CUSUM but still record the detection time.
             break
 
     detected_time = (
@@ -467,7 +490,15 @@ def cusum_detect_dynamic_budget(
     n_eval = (detected_idx + 1) if detected_idx is not None else n_t
     avg_active = (float(active_sizes[:n_eval].mean())
                   if n_eval > 0 else 0.0)
-    avg_budget_used = (float(used_budgets[:n_eval].mean())
+    avg_available = (float(available_sizes[:n_eval].mean())
+                     if n_eval > 0 else 0.0)
+    avg_sensing = (float(sensing_used_arr[:n_eval].mean())
+                   if n_eval > 0 else 0.0)
+    avg_transmission = (float(transmission_used_arr[:n_eval].mean())
+                        if n_eval > 0 else 0.0)
+    frac_avail_ge_2 = (float((available_sizes[:n_eval] >= 2).mean())
+                       if n_eval > 0 else 0.0)
+    frac_avail_ge_3 = (float((available_sizes[:n_eval] >= 3).mean())
                        if n_eval > 0 else 0.0)
 
     selection_summary = {
@@ -477,11 +508,22 @@ def cusum_detect_dynamic_budget(
             sid: int(selection_counts[sid])
             for sid in candidate_sensors
         },
+        "local_sensor_counts": {
+            sid: int(local_counts[sid]) for sid in candidate_sensors
+        },
+        "cooperative_sensor_counts": {
+            sid: int(cooperative_counts[sid]) for sid in candidate_sensors
+        },
+        "average_available_sensors_per_timestamp": avg_available,
         "average_active_sensors_per_timestamp": avg_active,
-        "average_budget_used": avg_budget_used,
+        "average_sensing_cost_used": avg_sensing,
+        "average_transmission_cost_used": avg_transmission,
+        "fraction_timestamps_at_least_2_available": frac_avail_ge_2,
+        "fraction_timestamps_at_least_3_available": frac_avail_ge_3,
         "timestamps_without_selection": int(timestamps_without_selection),
         "evaluated_timestamps": int(n_eval),
-        "budget": float(budget),
+        "sensing_budget": float(sensing_budget),
+        "transmission_budget": float(transmission_budget),
     }
 
     return DetectionResult(

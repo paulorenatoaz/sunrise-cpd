@@ -1,31 +1,42 @@
-"""Budget-aware sensor selection policy.
+"""Two-budget dynamic sensor selection policy.
 
 The Sunrise CPD experiment always operates on the same multi-sensor
-network. The *budget regime* fixes a numeric resource budget ``B`` that
-limits how much sensing/communication cost the sampling policy may
-spend per timestamp; the active subset ``S(t)`` is then selected
-*dynamically at each timestamp* by greedy information-per-cost ranking
-under the constraint
+network. The budget policy enforces *two* separate resource constraints
+that mirror the paper:
 
-    sum_{i in S(t)} (C_i + T_i)  <=  B.
+    sum_{i in S(t)} C_i  <=  B    (sensing/acquisition budget)
+    sum_{i in S(t)} T_i  <=  C    (transmission/communication budget)
 
-Per-sensor information is the global empirical Gaussian divergence
+The active subset ``S(t)`` is selected dynamically at every timestamp.
 
-    D_i = (mu_1 - mu_0)^2 / (2 sigma^2)
+Local/reference vs. cooperative sensors
+---------------------------------------
+At each timestamp ``t``, the first sensor selected by the greedy ranking
+is treated as the local/reference sensor. It consumes sensing cost but
+its *effective* transmission cost is zero because the local sensor does
+not need to transmit to itself. Each additional selected sensor is a
+cooperative/remote sensor that consumes both sensing cost and
+transmission cost. The local/reference sensor is *not* fixed globally:
+it depends on which sensors are available and on their D_i ranking at
+that timestamp.
 
-estimated once per sensor from the dataset (see
-:mod:`src.informativeness`). Because the SensorScope dataset does not
-provide real sensing or communication costs, the project uses an
-explicit unit-cost approximation by default:
+Cost model (this step: homogeneous synthetic costs)
+---------------------------------------------------
+Because the SensorScope dataset does not provide real sensing or
+communication costs, every sensor uses the explicit homogeneous
+synthetic costs
 
-    C_i = 1.0,  T_i = 0.0,  total_cost_i = 1.0
+    C_i = 1.0,  T_i = 1.0,  cost_source = "homogeneous_synthetic_cost_assumption".
 
-so that ``B`` reduces to a per-timestamp cardinality constraint while
-still being represented as an explicit numeric budget. The previous
-static helper :func:`select_sensors_by_budget` is kept only as a
-preliminary diagnostic that picks a fixed top-`k` subset once per
-scenario; the experiment runner uses the dynamic policy
-:func:`select_sensors_at_time` instead.
+The local/reference sensor receives an effective transmission cost of
+``0.0`` only inside :func:`select_sensors_at_time`; the persisted
+sensor cost record always stores ``T_i = 1.0``.
+
+Budget regimes
+--------------
+    low    -> B = 1.0,                   C = 0.0
+    medium -> B = 3.0,                   C = 2.0
+    high   -> B = number_of_valid,       C = number_of_valid - 1
 """
 from __future__ import annotations
 
@@ -45,38 +56,38 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 DEFAULT_SENSING_COST = 1.0
-DEFAULT_COMMUNICATION_COST = 0.0
-DEFAULT_COST_SOURCE = "unit_cost_assumption"
+DEFAULT_TRANSMISSION_COST = 1.0
+DEFAULT_COST_SOURCE = "homogeneous_synthetic_cost_assumption"
 
 SENSOR_COSTS_JSON = paths.JSON_DIR / "sensor_costs.json"
 
 
 @dataclass
 class SensorCost:
-    """Per-sensor sensing and communication cost."""
+    """Per-sensor sensing and transmission cost.
+
+    The transmission cost stored here is the *nominal* per-sensor cost.
+    Whether the cost is paid in full at a given timestamp depends on the
+    sensor's role at that timestamp (local/reference vs. cooperative).
+    """
 
     sensor_id: str
     sensing_cost: float = DEFAULT_SENSING_COST
-    communication_cost: float = DEFAULT_COMMUNICATION_COST
+    transmission_cost: float = DEFAULT_TRANSMISSION_COST
     cost_source: str = DEFAULT_COST_SOURCE
-
-    @property
-    def total_cost(self) -> float:
-        return float(self.sensing_cost) + float(self.communication_cost)
 
     def to_dict(self) -> dict:
         return {
             "sensor_id": self.sensor_id,
             "sensing_cost": float(self.sensing_cost),
-            "communication_cost": float(self.communication_cost),
-            "total_cost": float(self.total_cost),
+            "transmission_cost": float(self.transmission_cost),
             "cost_source": self.cost_source,
         }
 
 
 def default_sensor_costs(valid_sensors: Iterable[str]
                          ) -> dict[str, SensorCost]:
-    """Return default unit-cost ``SensorCost`` records for every sensor."""
+    """Return default homogeneous-cost ``SensorCost`` records."""
     return {
         str(sid): SensorCost(sensor_id=str(sid))
         for sid in valid_sensors
@@ -88,14 +99,19 @@ def write_sensor_costs(costs: Mapping[str, SensorCost],
     """Persist a sensor cost map to JSON."""
     paths.ensure_dirs()
     payload = {
-        "cost_model": "unit_cost_assumption",
+        "cost_model": "homogeneous_synthetic_cost_assumption",
         "cost_model_description": (
-            "Default unit costs are used because the SensorScope "
-            "dataset does not provide per-sensor sensing or "
-            "communication costs."
+            "Homogeneous synthetic per-sensor costs because the "
+            "SensorScope dataset does not provide measured sensing or "
+            "transmission costs. Every sensor uses C_i = 1.0 and "
+            "T_i = 1.0. The local/reference sensor's effective "
+            "transmission cost is set to 0.0 only dynamically inside "
+            "the per-timestamp selection step; the stored T_i is the "
+            "nominal cost incurred when the sensor is used as a "
+            "cooperative sensor."
         ),
         "default_sensing_cost": DEFAULT_SENSING_COST,
-        "default_communication_cost": DEFAULT_COMMUNICATION_COST,
+        "default_transmission_cost": DEFAULT_TRANSMISSION_COST,
         "sensors": [costs[sid].to_dict() for sid in sorted(costs)],
     }
     with open(out_path, "w", encoding="utf-8") as fh:
@@ -114,12 +130,16 @@ def load_sensor_costs(path: Path = SENSOR_COSTS_JSON
     out: dict[str, SensorCost] = {}
     for rec in payload.get("sensors", []):
         sid = str(rec["sensor_id"])
+        # Accept the legacy "communication_cost" field name as a
+        # fallback so old JSONs still load.
+        t_cost = rec.get("transmission_cost",
+                         rec.get("communication_cost",
+                                 DEFAULT_TRANSMISSION_COST))
         out[sid] = SensorCost(
             sensor_id=sid,
             sensing_cost=float(rec.get("sensing_cost",
                                        DEFAULT_SENSING_COST)),
-            communication_cost=float(rec.get("communication_cost",
-                                             DEFAULT_COMMUNICATION_COST)),
+            transmission_cost=float(t_cost),
             cost_source=str(rec.get("cost_source", DEFAULT_COST_SOURCE)),
         )
     return out
@@ -131,39 +151,42 @@ def load_sensor_costs(path: Path = SENSOR_COSTS_JSON
 
 @dataclass
 class BudgetPolicyConfig:
-    """Configuration of the dynamic budget-constrained sampling policy."""
+    """Configuration of the two-budget dynamic sampling policy."""
 
     regime: str
-    budget: float
-    unit_cost_assumption: bool = True
-    score_name: str = "D_i_per_total_cost"
+    sensing_budget: float
+    transmission_budget: float
+    unit_cost_assumption: bool = False
+    homogeneous_cost_assumption: bool = True
+    score_name: str = "D_i"
 
     def to_dict(self) -> dict:
         return {
             "regime": self.regime,
-            "budget": float(self.budget),
+            "sensing_budget": float(self.sensing_budget),
+            "transmission_budget": float(self.transmission_budget),
             "unit_cost_assumption": bool(self.unit_cost_assumption),
+            "homogeneous_cost_assumption": bool(
+                self.homogeneous_cost_assumption),
             "score_name": self.score_name,
         }
 
 
-def regime_budget(regime: str, n_valid_sensors: int) -> float:
-    """Return the default numeric budget for a regime under unit costs.
+def regime_budgets(regime: str, n_valid_sensors: int) -> tuple[float, float]:
+    """Return ``(sensing_budget, transmission_budget)`` for a regime.
 
-    With ``C_i = 1.0`` and ``T_i = 0.0`` the per-sensor total cost is
-    ``1.0``; the regime budgets are therefore:
-
-        low    -> 1.0
-        medium -> 3.0
-        high   -> n_valid_sensors  (any active subset fits)
+        low    -> (1.0, 0.0)
+        medium -> (3.0, 2.0)
+        high   -> (n_valid_sensors, n_valid_sensors - 1)
     """
     regime = regime.lower()
+    n = max(int(n_valid_sensors), 1)
     if regime == "low":
-        return 1.0
+        return 1.0, 0.0
     if regime == "medium":
-        return 3.0
+        return 3.0, 2.0
     if regime == "high":
-        return float(max(n_valid_sensors, 1))
+        return float(n), float(max(n - 1, 0))
     raise ValueError(f"Unknown regime: {regime!r}")
 
 
@@ -173,23 +196,34 @@ def regime_budget(regime: str, n_valid_sensors: int) -> float:
 
 @dataclass
 class DynamicBudgetSelection:
-    """Result of applying the dynamic budget policy at a single time."""
+    """Result of applying the dynamic two-budget policy at a single time."""
 
-    selected_sensors: list[str]
-    available_sensors: list[str]
-    rejected_sensors: list[str]
-    total_cost: float
-    budget: float
+    timestamp: object = None
+    available_sensors: list[str] = field(default_factory=list)
+    selected_sensors: list[str] = field(default_factory=list)
+    local_sensor: str | None = None
+    cooperative_sensors: list[str] = field(default_factory=list)
+    rejected_sensors: list[str] = field(default_factory=list)
+    sensing_cost_used: float = 0.0
+    transmission_cost_used: float = 0.0
+    sensing_budget: float = 0.0
+    transmission_budget: float = 0.0
     selection_scores: list[dict] = field(default_factory=list)
     selection_reason: str = ""
 
     def to_dict(self) -> dict:
         return {
-            "selected_sensors": list(self.selected_sensors),
+            "timestamp": (str(self.timestamp)
+                          if self.timestamp is not None else None),
             "available_sensors": list(self.available_sensors),
+            "selected_sensors": list(self.selected_sensors),
+            "local_sensor": self.local_sensor,
+            "cooperative_sensors": list(self.cooperative_sensors),
             "rejected_sensors": list(self.rejected_sensors),
-            "total_cost": float(self.total_cost),
-            "budget": float(self.budget),
+            "sensing_cost_used": float(self.sensing_cost_used),
+            "transmission_cost_used": float(self.transmission_cost_used),
+            "sensing_budget": float(self.sensing_budget),
+            "transmission_budget": float(self.transmission_budget),
             "selection_scores": list(self.selection_scores),
             "selection_reason": self.selection_reason,
         }
@@ -206,76 +240,110 @@ def _is_finite(x) -> bool:
 def select_sensors_at_time(available_sensors: Iterable[str],
                            sensor_informativeness: Mapping[str, float],
                            sensor_costs: Mapping[str, SensorCost],
-                           budget: float,
+                           sensing_budget: float,
+                           transmission_budget: float,
+                           timestamp=None,
                            ) -> DynamicBudgetSelection:
-    """Greedy information-per-cost selection at a single timestamp.
+    """Greedy two-budget selection at a single timestamp.
 
-    Args:
-        available_sensors: Sensors that report a finite observation at
-            the current timestamp ``t``.
-        sensor_informativeness: Mapping ``sensor_id -> D_i`` (global
-            empirical divergence).
-        sensor_costs: Mapping ``sensor_id -> SensorCost``. Sensors
-            without a cost entry receive default unit costs.
-        budget: Numeric budget ``B`` available at this timestamp.
+    Sensors are ranked by ``D_i`` (which equals ``D_i / (C_i + T_i)``
+    under the homogeneous synthetic cost assumption). The first
+    selected sensor is the local/reference sensor at this timestamp and
+    pays an effective transmission cost of ``0``; subsequent sensors
+    pay the full transmission cost. Both constraints
 
-    Returns:
-        A :class:`DynamicBudgetSelection` describing the active subset
-        ``S(t)``, its total cost, and the scores that drove the choice.
+        sum_{i in S(t)} C_i  <=  sensing_budget
+        sum_{i in S(t)} T_i_eff  <=  transmission_budget
+
+    are enforced separately.
     """
     available = [str(s) for s in available_sensors]
     scored: list[dict] = []
     for sid in available:
         d = sensor_informativeness.get(sid)
         cost = sensor_costs.get(sid) or SensorCost(sensor_id=sid)
-        total_cost = cost.total_cost
-        if (d is None or not _is_finite(d)
-                or total_cost <= 0 or not _is_finite(total_cost)):
-            score = float("-inf")
-        else:
-            score = float(d) / float(total_cost)
+        d_val = float(d) if d is not None and _is_finite(d) else None
+        score = d_val if d_val is not None else float("-inf")
         scored.append({
             "sensor_id": sid,
-            "D_i": (float(d) if d is not None and _is_finite(d) else None),
+            "D_i": d_val,
             "sensing_cost": float(cost.sensing_cost),
-            "communication_cost": float(cost.communication_cost),
-            "total_cost": float(total_cost),
+            "transmission_cost": float(cost.transmission_cost),
             "score": score,
         })
-
     scored.sort(key=lambda r: r["score"], reverse=True)
 
     selected: list[str] = []
-    used_cost = 0.0
+    cooperative: list[str] = []
+    local_sensor: str | None = None
+    sensing_used = 0.0
+    transmission_used = 0.0
     rejected: list[str] = []
+    tol = 1e-12
+
     for entry in scored:
         if entry["score"] == float("-inf"):
             rejected.append(entry["sensor_id"])
             continue
-        if used_cost + entry["total_cost"] <= budget + 1e-12:
-            selected.append(entry["sensor_id"])
-            used_cost += entry["total_cost"]
+        c_i = entry["sensing_cost"]
+        # First selectable sensor is the local/reference sensor and
+        # pays no transmission cost. Subsequent sensors are cooperative.
+        if local_sensor is None:
+            t_eff = 0.0
+            new_sense = sensing_used + c_i
+            new_trans = transmission_used + t_eff
+            if (new_sense <= sensing_budget + tol
+                    and new_trans <= transmission_budget + tol):
+                selected.append(entry["sensor_id"])
+                local_sensor = entry["sensor_id"]
+                sensing_used = new_sense
+                transmission_used = new_trans
+                entry["effective_transmission_cost"] = t_eff
+                entry["role"] = "local"
+            else:
+                rejected.append(entry["sensor_id"])
         else:
-            rejected.append(entry["sensor_id"])
+            t_eff = entry["transmission_cost"]
+            new_sense = sensing_used + c_i
+            new_trans = transmission_used + t_eff
+            if (new_sense <= sensing_budget + tol
+                    and new_trans <= transmission_budget + tol):
+                selected.append(entry["sensor_id"])
+                cooperative.append(entry["sensor_id"])
+                sensing_used = new_sense
+                transmission_used = new_trans
+                entry["effective_transmission_cost"] = t_eff
+                entry["role"] = "cooperative"
+            else:
+                rejected.append(entry["sensor_id"])
 
     if selected:
         reason = (
-            f"Greedy information-per-cost selection: chose "
-            f"{len(selected)}/{len(available)} available sensors using "
-            f"budget {used_cost:.3f} of {budget:.3f}."
+            f"Greedy two-budget selection: chose {len(selected)}/"
+            f"{len(available)} available sensors "
+            f"(1 local + {len(cooperative)} cooperative); "
+            f"sensing cost {sensing_used:.3f}/{sensing_budget:.3f}, "
+            f"transmission cost {transmission_used:.3f}/"
+            f"{transmission_budget:.3f}."
         )
     else:
         reason = (
-            f"No sensors selected at this timestamp (available="
-            f"{len(available)}, budget={budget:.3f})."
+            f"No sensors selected (available={len(available)}, "
+            f"sensing_budget={sensing_budget:.3f}, "
+            f"transmission_budget={transmission_budget:.3f})."
         )
 
     return DynamicBudgetSelection(
-        selected_sensors=selected,
+        timestamp=timestamp,
         available_sensors=available,
+        selected_sensors=selected,
+        local_sensor=local_sensor,
+        cooperative_sensors=cooperative,
         rejected_sensors=rejected,
-        total_cost=used_cost,
-        budget=float(budget),
+        sensing_cost_used=sensing_used,
+        transmission_cost_used=transmission_used,
+        sensing_budget=float(sensing_budget),
+        transmission_budget=float(transmission_budget),
         selection_scores=scored,
         selection_reason=reason,
     )
@@ -285,120 +353,28 @@ def build_sensor_ranking(valid_sensors: Iterable[str],
                          sensor_informativeness: Mapping[str, float],
                          sensor_costs: Mapping[str, SensorCost],
                          ) -> list[dict]:
-    """Return the static information-per-cost ranking of all valid sensors.
+    """Return the static D_i ranking of all valid sensors.
 
     Used for reporting only; the actual selection is performed
     dynamically at each timestamp by :func:`select_sensors_at_time`.
+    Under the homogeneous synthetic cost assumption (``C_i = T_i = 1``),
+    ranking by ``D_i`` is equivalent to ranking by information per cost.
     """
     rows: list[dict] = []
     for sid in valid_sensors:
         sid = str(sid)
         d = sensor_informativeness.get(sid)
         cost = sensor_costs.get(sid) or SensorCost(sensor_id=sid)
-        total = cost.total_cost
-        if (d is None or not _is_finite(d)
-                or total <= 0 or not _is_finite(total)):
-            score = None
-        else:
-            score = float(d) / float(total)
+        d_val = float(d) if d is not None and _is_finite(d) else None
         rows.append({
             "sensor_id": sid,
-            "D_i": (float(d) if d is not None and _is_finite(d) else None),
+            "D_i": d_val,
             "sensing_cost": float(cost.sensing_cost),
-            "communication_cost": float(cost.communication_cost),
-            "total_cost": float(total),
-            "score": score,
+            "transmission_cost": float(cost.transmission_cost),
+            "score": d_val,
         })
     rows.sort(key=lambda r: (r["score"] is None,
                              -(r["score"] if r["score"] is not None else 0.0)))
     for rank, row in enumerate(rows, start=1):
         row["rank"] = rank
     return rows
-
-
-# ---------------------------------------------------------------------------
-# Legacy preliminary static helper (kept for backward compatibility)
-# ---------------------------------------------------------------------------
-
-@dataclass
-class BudgetSelection:
-    """Result of the *preliminary* static budget approximation.
-
-    .. deprecated::
-        Kept only for backward compatibility. The main experiment uses
-        the dynamic per-timestamp policy in
-        :func:`select_sensors_at_time`.
-    """
-
-    selected_sensors: list[str]
-    budget_regime: str
-    selection_reason: str
-    ranking_used: list[dict]
-    unit_cost_assumption: bool
-    k: int
-
-    def to_dict(self) -> dict:
-        return {
-            "selected_sensors": list(self.selected_sensors),
-            "budget_regime": self.budget_regime,
-            "selection_reason": self.selection_reason,
-            "ranking_used": self.ranking_used,
-            "unit_cost_assumption": self.unit_cost_assumption,
-            "k": self.k,
-        }
-
-
-def select_sensors_by_budget(valid_sensors: Iterable[str],
-                             sensor_informativeness: list[dict],
-                             regime: str,
-                             k: int = 3,
-                             ) -> BudgetSelection:
-    """Static top-`k` selection (preliminary diagnostic helper).
-
-    .. deprecated::
-        Use :func:`select_sensors_at_time` inside a per-timestamp loop
-        for the corrected dynamic budget policy. This helper picks a
-        fixed subset once and is not the project's main budget
-        implementation.
-    """
-    regime = regime.lower()
-    if regime not in {"low", "medium", "high"}:
-        raise ValueError(f"Unknown budget regime: {regime!r}")
-    info_map = {
-        str(rec["sensor_id"]): rec.get("D_i")
-        for rec in sensor_informativeness
-    }
-    valid_list = [str(s) for s in valid_sensors]
-    ranking: list[dict] = []
-    for sid in valid_list:
-        d = info_map.get(sid)
-        ranking.append({
-            "sensor_id": sid,
-            "D_i": d,
-            "score": d if d is not None else float("-inf"),
-        })
-    ranking.sort(key=lambda r: r["score"], reverse=True)
-    for rank, entry in enumerate(ranking, start=1):
-        entry["rank"] = rank
-
-    if regime == "low":
-        n = 1 if ranking else 0
-    elif regime == "medium":
-        n = max(0, min(k, len(ranking)))
-    else:
-        n = len(ranking)
-    selected = [r["sensor_id"] for r in ranking[:n]]
-    reason = (
-        f"Preliminary static {regime}-budget selection: top-{n} sensors "
-        f"by D_i out of {len(valid_list)} valid sensors. This is a "
-        "diagnostic approximation; the main experiment uses the "
-        "dynamic per-timestamp policy."
-    )
-    return BudgetSelection(
-        selected_sensors=selected,
-        budget_regime=regime,
-        selection_reason=reason,
-        ranking_used=ranking,
-        unit_cost_assumption=True,
-        k=k,
-    )

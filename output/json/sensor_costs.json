@@ -1,71 +1,62 @@
 {
-  "cost_model": "unit_cost_assumption",
-  "cost_model_description": "Default unit costs are used because the SensorScope dataset does not provide per-sensor sensing or communication costs.",
+  "cost_model": "homogeneous_synthetic_cost_assumption",
+  "cost_model_description": "Homogeneous synthetic per-sensor costs because the SensorScope dataset does not provide measured sensing or transmission costs. Every sensor uses C_i = 1.0 and T_i = 1.0. The local/reference sensor's effective transmission cost is set to 0.0 only dynamically inside the per-timestamp selection step; the stored T_i is the nominal cost incurred when the sensor is used as a cooperative sensor.",
   "default_sensing_cost": 1.0,
-  "default_communication_cost": 0.0,
+  "default_transmission_cost": 1.0,
   "sensors": [
     {
       "sensor_id": "2",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "25",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "28",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "29",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "3",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "31",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "32",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "4",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     },
     {
       "sensor_id": "5",
       "sensing_cost": 1.0,
-      "communication_cost": 0.0,
-      "total_cost": 1.0,
-      "cost_source": "unit_cost_assumption"
+      "transmission_cost": 1.0,
+      "cost_source": "homogeneous_synthetic_cost_assumption"
     }
   ]
 }

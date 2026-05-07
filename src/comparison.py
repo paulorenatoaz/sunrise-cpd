@@ -28,8 +28,12 @@ _SCENARIOS = [
 
 _METRIC_FIELDS = [
     ("detected_days_count", "Detected days"),
+    ("on_time_count", "On-time detections"),
+    ("late_detection_count", "Late detections"),
     ("missed_detection_count", "Missed detections"),
     ("false_alarm_count", "False alarms"),
+    ("out_of_tolerance_count", "Out-of-tolerance"),
+    ("on_time_rate", "On-time rate"),
     ("mean_signed_delay_minutes", "Mean signed delay [min]"),
     ("median_signed_delay_minutes", "Median signed delay [min]"),
     ("mean_absolute_error_minutes", "Mean |error| [min]"),
@@ -37,8 +41,13 @@ _METRIC_FIELDS = [
     ("std_signed_delay_minutes", "Std signed delay [min]"),
     ("min_signed_delay_minutes", "Min signed delay [min]"),
     ("max_signed_delay_minutes", "Max signed delay [min]"),
+    ("ADD_like_positive_delay_minutes",
+     "ADD-like mean positive delay [min]"),
+    ("median_positive_delay_minutes", "Median positive delay [min]"),
+    ("mean_available_sensors_per_timestamp", "Mean |A(t)|"),
     ("mean_active_sensors_per_timestamp", "Mean |S(t)|"),
-    ("mean_budget_used_per_timestamp", "Mean budget used"),
+    ("mean_sensing_cost_used", "Mean sensing cost used"),
+    ("mean_transmission_cost_used", "Mean transmission cost used"),
 ]
 
 
@@ -54,11 +63,18 @@ def _summary_row(scenario: str, payload: dict) -> dict:
     sel_summary = payload.get("selected_sensors_summary", {}) or {}
     ever = sel_summary.get("sensors_ever_selected", []) or []
     most_freq = sel_summary.get("most_frequently_selected_sensors", []) or []
+    most_local = sel_summary.get(
+        "most_frequently_selected_local_sensors", []) or []
+    most_coop = sel_summary.get(
+        "most_frequently_selected_cooperative_sensors", []) or []
     row = {
         "scenario_name": payload.get("scenario_name"),
         "budget_regime": scenario,
-        "budget_value": payload.get("budget_value"),
+        "sensing_budget": payload.get("sensing_budget"),
+        "transmission_budget": payload.get("transmission_budget"),
         "cost_model": payload.get("cost_model"),
+        "homogeneous_cost_assumption": payload.get(
+            "homogeneous_cost_assumption"),
         "dynamic_selection": payload.get("dynamic_selection"),
         "selection_policy": payload.get("selection_policy"),
         "full_candidate_sensors": list(
@@ -67,6 +83,14 @@ def _summary_row(scenario: str, payload: dict) -> dict:
         "most_frequently_selected_sensors": [
             f"{r['sensor_id']} (n={r['selection_count']})"
             for r in most_freq[:5]
+        ],
+        "most_frequently_selected_local_sensors": [
+            f"{r['sensor_id']} (n={r['selection_count']})"
+            for r in most_local[:5]
+        ],
+        "most_frequently_selected_cooperative_sensors": [
+            f"{r['sensor_id']} (n={r['selection_count']})"
+            for r in most_coop[:5]
         ],
     }
     for key, _ in _METRIC_FIELDS:
@@ -340,20 +364,25 @@ def render_comparison_report(out_path: Path = COMPARISON_HTML,
 
     # Comparison table.
     headers = [
-        "Scenario", "Budget regime", "Budget B", "Cost model",
+        "Scenario", "Budget regime", "Sensing B", "Transmission C",
+        "Cost model",
         "Candidate sensors", "Sensors ever selected",
-        "Most frequently selected",
+        "Most freq. (any role)",
+        "Most freq. local", "Most freq. cooperative",
     ] + [label for _, label in _METRIC_FIELDS]
     rows = []
     for s in scenarios:
         row = [
             s.get("scenario_name"),
             s.get("budget_regime"),
-            s.get("budget_value"),
+            s.get("sensing_budget"),
+            s.get("transmission_budget"),
             s.get("cost_model"),
             s.get("full_candidate_sensors"),
             s.get("sensors_ever_selected"),
             s.get("most_frequently_selected_sensors"),
+            s.get("most_frequently_selected_local_sensors"),
+            s.get("most_frequently_selected_cooperative_sensors"),
         ]
         for key, _ in _METRIC_FIELDS:
             row.append(s.get(key))
@@ -398,10 +427,12 @@ def render_comparison_report(out_path: Path = COMPARISON_HTML,
         "<li>Detector parameters and the analysis window are held fixed "
         "across budget regimes to isolate the effect of the sensor "
         "budget.</li>"
-        "<li>Sensing and communication costs C_i, T_i are not measured "
-        "in the dataset; the explicit unit-cost assumption "
-        "C_i = 1.0, T_i = 0.0 is recorded in "
-        "<code>output/json/sensor_costs.json</code>.</li>"
+        "<li>Sensing and transmission costs C_i, T_i are not measured "
+        "in the dataset; the explicit homogeneous synthetic assumption "
+        "C_i = 1.0, T_i = 1.0 is recorded in "
+        "<code>output/json/sensor_costs.json</code>. The local/reference "
+        "sensor's effective transmission cost is 0 only inside the "
+        "per-timestamp selection step.</li>"
         "<li>The aggregation rule (mean of finite per-sensor LLRs over "
         "the dynamic subset S(t)) treats all active sensors symmetrically; "
         "weighted aggregation by D_i is not part of the present "

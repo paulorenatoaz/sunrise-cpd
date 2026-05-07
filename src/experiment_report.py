@@ -61,20 +61,22 @@ GOAL_STATEMENT = (
 )
 _SCENARIO_HEADLINE = {
     "low": (
-        "Low budget. The same multi-sensor network is available; at "
-        "each timestamp the dynamic budget policy may activate at most "
-        "one sensor (B = 1.0 under the unit-cost approximation). The "
-        "chosen sensor may vary across timestamps and days."
+        "Low budget. The dynamic two-budget policy enforces "
+        "sensing_budget B = 1.0 and transmission_budget C = 0.0, so "
+        "at most one sensor (the local/reference sensor) is selected "
+        "at each timestamp; no cooperative sensors are allowed."
     ),
     "medium": (
-        "Medium budget. At each timestamp the dynamic budget policy "
-        "may activate up to three sensors (B = 3.0 under the unit-cost "
-        "approximation). The active subset S(t) may vary over time."
+        "Medium budget. The dynamic two-budget policy enforces "
+        "sensing_budget B = 3.0 and transmission_budget C = 2.0, so "
+        "up to three sensors are selected at each timestamp: one "
+        "local/reference sensor plus up to two cooperative sensors."
     ),
     "high": (
-        "High budget. The dynamic budget policy uses B equal to the "
-        "number of valid sensors, so all available sensors may be "
-        "activated at every timestamp."
+        "High budget. The dynamic two-budget policy uses "
+        "sensing_budget B equal to the number of valid sensors and "
+        "transmission_budget C equal to that number minus one, so "
+        "all available sensors may be selected at every timestamp."
     ),
 }
 
@@ -95,6 +97,7 @@ th { background: #f4f4f4; }
 .status-detected { color: #0d47a1; font-weight: 600; }
 .status-false_alarm { color: #b8651f; font-weight: 600; }
 .status-missed_detection { color: #7a1f1f; font-weight: 600; }
+.status-late_detection { color: #b8651f; font-weight: 600; }
 code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
 .meta { color: #666; font-size: 0.9em; }
 img { max-width: 100%; border: 1px solid #ddd; padding: 4px; background: #fff; }
@@ -236,7 +239,9 @@ def _build_example_plot(results: dict) -> Path | None:
     axes[0].legend(loc="upper left", fontsize=8)
     axes[0].set_title(
         f"Example day {target['date']} — "
-        f"{results['budget_regime']} budget, B={results.get('budget_value')}, "
+        f"{results['budget_regime']} budget, "
+        f"B={results.get('sensing_budget')}, "
+        f"C={results.get('transmission_budget')}, "
         f"top sensors {selected}"
     )
 
@@ -336,57 +341,88 @@ def render_scenario_report(scenario: str,
         ))
 
     sections.append(_section(
-        "4. Multi-Sensor Model and Budget Regimes",
+        "4. Multi-Sensor Model and Two-Budget Regimes",
         f"<div class='statement'>{escape(headline)}</div>"
         "<p>The unified experiment always loads the full set of valid "
-        "sensors. A dynamic budget policy then selects the active "
-        "subset <code>S(t)</code> at every timestamp under the "
-        "explicit budget constraint "
-        "<code>sum_{i in S(t)} (C_i + T_i) &lt;= B</code>:</p>"
+        "sensors. The dynamic two-budget policy then selects the "
+        "active subset <code>S(t)</code> at every timestamp under "
+        "<em>two separate</em> resource constraints (mirroring the "
+        "paper):</p>"
+        "<pre><code>"
+        "sum_{i in S(t)} C_i &lt;= sensing_budget B\n"
+        "sum_{i in S(t)} T_i &lt;= transmission_budget C"
+        "</code></pre>"
         "<ul>"
-        "<li><strong>Low budget</strong>: <code>B = 1.0</code> "
-        "(unit-cost approximation).</li>"
-        "<li><strong>Medium budget</strong>: <code>B = 3.0</code> "
-        "(unit-cost approximation).</li>"
-        "<li><strong>High budget</strong>: <code>B = |valid sensors|</code> "
-        "so the constraint is non-binding.</li>"
+        "<li><strong>Low budget</strong>: <code>B = 1.0</code>, "
+        "<code>C = 0.0</code> — at most one sensor per timestamp "
+        "(local/reference only); no cooperative sensors.</li>"
+        "<li><strong>Medium budget</strong>: <code>B = 3.0</code>, "
+        "<code>C = 2.0</code> — up to one local/reference sensor "
+        "plus up to two cooperative sensors per timestamp.</li>"
+        "<li><strong>High budget</strong>: <code>B = |valid|</code>, "
+        "<code>C = |valid| - 1</code> — all available sensors may be "
+        "selected at every timestamp.</li>"
         "</ul>"
-        "<p>Sensing and communication costs <code>C_i</code>, "
-        "<code>T_i</code> are not measured in the dataset; the report "
-        "applies the explicit unit-cost assumption "
-        "<code>C_i = 1.0, T_i = 0.0</code> stored in "
-        "<code>output/json/sensor_costs.json</code>. The selection "
-        "policy ranks available sensors by "
-        "<code>D_i / (C_i + T_i)</code> and greedily picks "
-        "<code>S(t)</code> while the cumulative cost stays "
-        "within <code>B</code>.</p>"
+        "<h3>Local/reference and cooperative sensors</h3>"
+        "<p>At each timestamp the first selected sensor is treated as "
+        "the <em>local/reference sensor</em> and pays an effective "
+        "transmission cost of <code>0</code> because it does not need "
+        "to transmit to itself. Each additional selected sensor is a "
+        "<em>cooperative/remote sensor</em> and pays its full nominal "
+        "transmission cost. The local/reference sensor is not fixed: "
+        "it is whichever available sensor has the highest <code>D_i</code> "
+        "at that timestamp.</p>"
+        "<h3>Cost model (homogeneous synthetic)</h3>"
+        "<p>Sensing and transmission costs <code>C_i</code>, "
+        "<code>T_i</code> are not measured in the dataset; this report "
+        "applies the explicit homogeneous synthetic assumption "
+        "<code>C_i = 1.0</code>, <code>T_i = 1.0</code> stored in "
+        "<code>output/json/sensor_costs.json</code>. The local/reference "
+        "sensor's effective transmission cost <code>T_i_eff = 0</code> "
+        "is applied only dynamically inside the per-timestamp selection "
+        "step. Under homogeneous costs, ranking by "
+        "<code>D_i</code> is equivalent to ranking by information per "
+        "cost; the implementation is structured so that heterogeneous "
+        "costs can be added later without changing the policy code.</p>"
     ))
 
     ranking_rows = [
         [r.get("rank"), r.get("sensor_id"), r.get("D_i"),
-         r.get("total_cost"), r.get("score")]
+         r.get("sensing_cost"), r.get("transmission_cost"),
+         r.get("score")]
         for r in results.get("sensor_ranking", [])
     ]
     sel_summary = results.get("selected_sensors_summary", {}) or {}
     most_freq = sel_summary.get("most_frequently_selected_sensors", [])
-    most_freq_str = ", ".join(
-        f"{r['sensor_id']} (n={r['selection_count']})" for r in most_freq
-    ) or "n/a"
+    most_freq_local = sel_summary.get(
+        "most_frequently_selected_local_sensors", [])
+    most_freq_coop = sel_summary.get(
+        "most_frequently_selected_cooperative_sensors", [])
+
+    def _fmt_freq(items):
+        if not items:
+            return "<em>n/a</em>"
+        return ", ".join(
+            f"{r['sensor_id']} (n={r['selection_count']})" for r in items
+        )
+
     cost_rows = [
         [c.get("sensor_id"), c.get("sensing_cost"),
-         c.get("communication_cost"), c.get("total_cost"),
-         c.get("cost_source")]
+         c.get("transmission_cost"), c.get("cost_source")]
         for c in results.get("sensor_costs", [])
     ]
     sections.append(_section(
-        "5. Dynamic Budget Policy",
+        "5. Dynamic Two-Budget Policy",
         _table(["Field", "Value"], [
             ["Budget regime", results["budget_regime"]],
             ["Description", results["budget_description"]],
-            ["Budget value B", results.get("budget_value")],
-            ["Budget constraint", results.get("budget_constraint")],
+            ["Sensing budget B", results.get("sensing_budget")],
+            ["Transmission budget C", results.get("transmission_budget")],
+            ["Budget constraints",
+             " ; ".join(results.get("budget_constraints", []))],
             ["Cost model", results.get("cost_model")],
-            ["Unit cost assumption", results.get("unit_cost_assumption")],
+            ["Homogeneous cost assumption",
+             results.get("homogeneous_cost_assumption")],
             ["Dynamic selection", results.get("dynamic_selection")],
             ["Selection policy", results["selection_policy"]],
             ["Score",
@@ -395,15 +431,23 @@ def render_scenario_report(scenario: str,
              ", ".join(results.get("full_candidate_sensors", []))],
             ["Sensors ever selected",
              ", ".join(sel_summary.get("sensors_ever_selected", []))],
-            ["Most frequently selected sensors", most_freq_str],
+            ["Most frequently selected (any role)",
+             _fmt_freq(most_freq)],
+            ["Most frequently selected as local/reference",
+             _fmt_freq(most_freq_local)],
+            ["Most frequently selected as cooperative",
+             _fmt_freq(most_freq_coop)],
             ["Detector input mode", results.get("detector_input_mode")],
         ])
-        + "<h3>Sensor cost model</h3>"
-        + _table(["Sensor ID", "C_i", "T_i", "C_i + T_i", "Source"],
-                 cost_rows)
-        + "<h3>Sensor ranking by information-per-cost</h3>"
-        + _table(["Rank", "Sensor ID", "D_i", "C_i + T_i",
-                  "D_i / (C_i + T_i)"], ranking_rows)
+        + "<h3>Sensor cost model (nominal)</h3>"
+        + _table(["Sensor ID", "C_i", "T_i", "Source"], cost_rows)
+        + "<p class='meta'>The local/reference sensor's effective "
+          "transmission cost is 0 only inside the per-timestamp "
+          "selection step; the table above shows the nominal stored "
+          "costs.</p>"
+        + "<h3>Sensor ranking by D_i</h3>"
+        + _table(["Rank", "Sensor ID", "D_i", "C_i", "T_i", "Score"],
+                 ranking_rows)
     ))
 
     # Per-sensor empirical statistics for all candidate sensors.
@@ -490,8 +534,9 @@ def render_scenario_report(scenario: str,
     head = ("<tr>" + "".join(f"<th>{h}</th>" for h in [
         "Date", "Sunrise (local)", "Detected (local)",
         "Signed delay [min]", "|Error| [min]", "Status",
-        "False alarm", "Missed", "Sensors ever selected",
-        "Avg |S(t)|", "Avg budget", "Grid pts",
+        "Most freq. local", "Sensors ever selected",
+        "Avg avail.", "Avg |S(t)|",
+        "Avg sensing", "Avg transmission", "Grid pts",
     ]) + "</tr>")
     body_rows = []
     for p in results["per_day_results"]:
@@ -504,11 +549,13 @@ def render_scenario_report(scenario: str,
             f"<td>{_fmt(p['absolute_error_minutes'])}</td>"
             f"<td><span class='status-{p['status']}'>"
             f"{escape(p['status'])}</span></td>"
-            f"<td>{p['false_alarm']}</td>"
-            f"<td>{p['missed_detection']}</td>"
+            f"<td>{escape(str(p.get('most_frequent_local_sensor') or ''))}"
+            f" (n={p.get('most_frequent_local_sensor_count', 0)})</td>"
             f"<td>{escape(','.join(p.get('sensors_ever_selected', [])))}</td>"
+            f"<td>{_fmt(p.get('average_available_sensors_per_timestamp'))}</td>"
             f"<td>{_fmt(p.get('average_active_sensors_per_timestamp'))}</td>"
-            f"<td>{_fmt(p.get('average_budget_used'))}</td>"
+            f"<td>{_fmt(p.get('average_sensing_cost_used'))}</td>"
+            f"<td>{_fmt(p.get('average_transmission_cost_used'))}</td>"
             f"<td>{p['grid_points']}</td>"
             "</tr>"
         )
@@ -527,11 +574,14 @@ def render_scenario_report(scenario: str,
         "analysis window, synchronization frequency, and missing-data "
         "handling) are held fixed across budget regimes to isolate the "
         "effect of the sensor budget.</li>"
-        "<li>Sensing and communication costs C_i, T_i are not measured "
-        "in the dataset; the explicit unit-cost assumption "
-        "C_i = 1.0, T_i = 0.0 (total cost 1.0) is recorded in "
-        "<code>output/json/sensor_costs.json</code>, so the dynamic "
-        "information-per-cost score reduces to D_i.</li>"
+        "<li>Sensing and transmission costs C_i, T_i are not measured "
+        "in the dataset; the explicit homogeneous synthetic assumption "
+        "C_i = 1.0, T_i = 1.0 is recorded in "
+        "<code>output/json/sensor_costs.json</code>. The local/reference "
+        "sensor's effective transmission cost is 0 only inside the "
+        "per-timestamp selection step. Under homogeneous costs, "
+        "ranking by D_i is equivalent to ranking by information per "
+        "cost.</li>"
         "<li>The evaluation addresses the non-adversarial "
         "resource-constrained setting; the covert adversarial model is "
         "not analyzed.</li>"
